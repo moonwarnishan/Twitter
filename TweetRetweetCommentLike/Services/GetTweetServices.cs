@@ -3,17 +3,145 @@
     public class GetTweetServices : IGetTweetServices
     {
         private readonly IMongoCollection<TimelineTweets> _timelineCollection;
-        public GetTweetServices(IOptions<DatabaseSetting.DatabaseSetting> db)
+        private readonly ILikeCommentRetweetServices _likeCommentRetweetServices;
+
+        public GetTweetServices(IOptions<DatabaseSetting.DatabaseSetting> db ,ILikeCommentRetweetServices likeCommentRetweetServices)
         {
             var client = new MongoClient(db.Value.connectionString);
             var database = client.GetDatabase(db.Value.databaseName);
             _timelineCollection = database.GetCollection<TimelineTweets>(db.Value.userTimelineCollection);
+            _likeCommentRetweetServices = likeCommentRetweetServices;
         }
         //get tweets
-        public async Task<List<Tweet>> GetTimelineTweets(string userName)
+        public async Task<List<TweetDto>> GetTimelineTweets(string userName)
         {
             var collections = await _timelineCollection.Find(x => x.userName == userName).FirstOrDefaultAsync();
-            return collections.tweets;
+            var Tweets=new List<TweetDto>();
+
+            foreach (var timelineTweet in collections.tweets)
+            {
+                var likecmnts = await _likeCommentRetweetServices.getAll(timelineTweet.tweetId);
+                if (likecmnts != null)
+                {
+                    var dto = new TweetDto()
+                    {
+                        tweetId = timelineTweet.tweetId,
+                        userName = timelineTweet.userName,
+                        tweetText = timelineTweet.tweetText,
+                        tweetTime = timelineTweet.tweetTime,
+                        comments = likecmnts.comments,
+                        likes = likecmnts.likes,
+                        retweets = likecmnts.retweets
+                    };
+                    Tweets.Add(dto);
+                }
+                else
+                {
+                    var dto = new TweetDto()
+                    {
+                        tweetId = timelineTweet.tweetId,
+                        userName = timelineTweet.userName,
+                        tweetText = timelineTweet.tweetText,
+                        tweetTime = timelineTweet.tweetTime,
+                        comments = new List<CommentDto>(),
+                        likes = new List<string>(),
+                        retweets = new List<RetweetDto>()
+                    };
+                    Tweets.Add(dto);
+                }
+                
+            }
+
+            return Tweets;
+        }
+
+        //get specific tweet
+        public async Task<TweetDto> getTweetbyId(string userName, string TweetId)
+        {
+            var tweet =await  _timelineCollection.Find(x => x.userName == userName).FirstOrDefaultAsync();
+            var twt = tweet.tweets.Find(x => x.tweetId == TweetId);
+            var likecmnts =await _likeCommentRetweetServices.getAll(TweetId);
+            if (likecmnts != null)
+            {
+                var dto = new TweetDto()
+                {
+                    tweetId = TweetId,
+                    userName =twt.userName,
+                    tweetText = twt.tweetText,
+                    tweetTime = twt.tweetTime,
+                    comments = likecmnts.comments,
+                    likes = likecmnts.likes,
+                    retweets = likecmnts.retweets
+                };
+                return dto;
+            }
+            else
+            {
+                var dto = new TweetDto()
+                {
+                    tweetId = twt.tweetId,
+                    userName = twt.userName,
+                    tweetText = twt.tweetText,
+                    tweetTime = twt.tweetTime,
+                    comments = new List<CommentDto>(),
+                    likes = new List<string>(),
+                    retweets = new List<RetweetDto>()
+                };
+                return dto;
+            }
+
+        }
+
+        public async Task<List<TweetDto>> GeTweetsbyuserName(string userName)
+        {
+            var collection = await _timelineCollection.Find(x => x.userName == userName).FirstOrDefaultAsync();
+
+            var tweets = collection.tweets.FindAll(x => x.userName == userName);
+            var Tweets = new List<TweetDto>();
+
+            foreach (var timelineTweet in tweets)
+            {
+                var likecmnts = await _likeCommentRetweetServices.getAll(timelineTweet.tweetId);
+                if (likecmnts != null)
+                {
+                    var dto = new TweetDto()
+                    {
+                        tweetId = timelineTweet.tweetId,
+                        userName = timelineTweet.userName,
+                        tweetText = timelineTweet.tweetText,
+                        tweetTime = timelineTweet.tweetTime,
+                        comments = likecmnts.comments,
+                        likes = likecmnts.likes,
+                        retweets = likecmnts.retweets
+                    };
+                    Tweets.Add(dto);
+                }
+                else
+                {
+                    var dto = new TweetDto()
+                    {
+                        tweetId = timelineTweet.tweetId,
+                        userName = timelineTweet.userName,
+                        tweetText = timelineTweet.tweetText,
+                        tweetTime = timelineTweet.tweetTime,
+                        comments = new List<CommentDto>(),
+                        likes = new List<string>(),
+                        retweets = new List<RetweetDto>()
+                    };
+                    Tweets.Add(dto);
+                }
+
+            }
+
+            return Tweets;
+        }
+
+        //remove tweets
+        public async Task RemoveTweet(string followedName, string userName)
+        {
+            var collections = await _timelineCollection.Find(x => x.userName == userName).FirstOrDefaultAsync();
+            collections.tweets.RemoveAll(x => x.userName == followedName);
+            await _timelineCollection.ReplaceOneAsync(x => x.userName == userName, collections);
         }
 
 

@@ -7,12 +7,14 @@ namespace TweetRetweetCommentLike.Services
     public class FollowBlockIndividualServices : IFollowBlockIndividualServices
     {
         private readonly IMongoCollection<FollowBlockIndividual> _folllowees;
+        private readonly IGetTweetServices _getTweetServices;
 
-        public FollowBlockIndividualServices(IOptions<DatabaseSetting.DatabaseSetting> DBsetting)
+        public FollowBlockIndividualServices(IOptions<DatabaseSetting.DatabaseSetting> DBsetting, IGetTweetServices getTweetServices)
         {
             var client = new MongoClient(DBsetting.Value.connectionString);
             var db = client.GetDatabase(DBsetting.Value.databaseName);
             _folllowees = db.GetCollection<FollowBlockIndividual>(DBsetting.Value.followeeBlockeeCollectionName);
+            _getTweetServices = getTweetServices;
         }
         //create new follow
         public async Task CreateFollowee(string userName, string followeeName)
@@ -34,6 +36,7 @@ namespace TweetRetweetCommentLike.Services
             var followee = await _folllowees.Find(f => f.userName.ToLower() == userName.ToLower()).FirstOrDefaultAsync();
             if (followee != null)
             {
+                await _getTweetServices.RemoveTweet(userName, followeeName);
                 followee.FollowedByUsersNames.Remove(followeeName);
                 await _folllowees.ReplaceOneAsync(f => f.userName == userName, followee);
             }
@@ -65,10 +68,14 @@ namespace TweetRetweetCommentLike.Services
             var blockee = await _folllowees.Find(f => f.userName.ToLower() == blockeeName.ToLower()).FirstOrDefaultAsync();
             if (blockee == null)
             {
+                await _getTweetServices.RemoveTweet(userName, blockeeName);
+                await _getTweetServices.RemoveTweet(blockeeName, userName);
                 await _folllowees.InsertOneAsync(new FollowBlockIndividual { userName = blockeeName, blockedByUsersNames  = new List<string> { userName } });
             }
             else
             {
+                await _getTweetServices.RemoveTweet(userName, blockeeName);
+                await _getTweetServices.RemoveTweet(blockeeName, userName);
                 blockee.blockedByUsersNames.Add(userName);
                 await _folllowees.ReplaceOneAsync(f => f.userName ==blockeeName, blockee);
             }

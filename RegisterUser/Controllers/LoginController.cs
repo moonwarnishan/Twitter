@@ -6,10 +6,12 @@
     {
         private readonly JwtServices _jwtServices;
         private readonly IRabbitMQConsume _rabbitMqConsume;
-        public LoginController(JwtServices jwtServices, IRabbitMQConsume rabbitMqConsume)
+        private readonly IRabbitMqDeleteService _deleteService;
+        public LoginController(JwtServices jwtServices, IRabbitMQConsume rabbitMqConsume, IRabbitMqDeleteService deleteService)
         {
             _jwtServices = jwtServices;
             _rabbitMqConsume = rabbitMqConsume;
+            _deleteService = deleteService;
         }
         [HttpPost]
         public async Task<IActionResult> Login([FromBody] LoginModel M)
@@ -48,6 +50,25 @@
             
             return Ok();
         }
+
+        [HttpGet("{userName}")]
+        public async Task<IActionResult> DeleteTweet(string userName)
+        {
+            try
+            {
+                await _deleteService.Connect(userName);
+            }
+            catch (Exception)
+            {
+
+            }
+
+            return Ok();
+        }
+
+
+
+
 
     }
 }

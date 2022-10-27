@@ -9,8 +9,8 @@ builder.Services.AddCors(options => options.AddPolicy("CorsPolicy", builder =>
             .AllowCredentials()
     )
 );
-var multiplexer = ConnectionMultiplexer.Connect("127.0.0.1:6379");
-builder.Services.AddSingleton<IConnectionMultiplexer>(multiplexer);
+builder.Services.Configure<DatabaseSetting>(
+    builder.Configuration.GetSection("DatabaseSetting"));
 builder.Services.AddSingleton<IServices,Services>();
 builder.Services.AddControllers();
 builder.Services.AddAuthentication(x =>

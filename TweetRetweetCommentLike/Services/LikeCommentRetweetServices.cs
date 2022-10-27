@@ -145,5 +145,9 @@
             return await _likeCommentRetweet.Find(x => x.tweetId == tweetId).FirstOrDefaultAsync();
         }
 
+        public async Task Delete(string tweetId)
+        {
+            await _likeCommentRetweet.DeleteOneAsync(x=>x.tweetId==tweetId);
+        }
     }
 }

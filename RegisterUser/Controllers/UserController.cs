@@ -5,14 +5,13 @@ namespace RegisterUser.Controllers
     [ApiController]
     public class UserController : ControllerBase
     {
-        private readonly SearchServiceRedis _searchServiceRedis;
+        
         private readonly UserServices _userServices;
         private readonly SearchServiceMongo _searchServiceMongo;
 
-        public UserController(UserServices userServices, SearchServiceRedis searchServiceRedis, SearchServiceMongo searchServiceMongo)
+        public UserController(UserServices userServices, SearchServiceMongo searchServiceMongo)
         {
             _userServices = userServices;
-            _searchServiceRedis = searchServiceRedis;
             _searchServiceMongo = searchServiceMongo;
         }
         
@@ -30,7 +29,6 @@ namespace RegisterUser.Controllers
                 password = PasswordHash.HashPassword(NewUser.password)
             };
             await _userServices.CreateAsync(user);
-            await _searchServiceRedis.SetUserSearchValue(user.userName, user.name, user.userId);
             return Ok();
             
         }
@@ -65,8 +63,7 @@ namespace RegisterUser.Controllers
                 return NotFound();
             }
 
-            _searchServiceRedis?.DeleteKey(user.userName, user.name);
-            _searchServiceMongo?.delete("Dopamine_User_Search:" + user.userName + "+" + user.name);
+            
             user.name = updateUser.name;
             user.userName = updateUser.userName;
             user.dateOfBirth = updateUser.dateOfBirth;
@@ -75,7 +72,6 @@ namespace RegisterUser.Controllers
                 key = "Dopamine_User_Search:" + user.userName + "+" + user.name,
                 value = user.userId,
             });
-            _searchServiceRedis?.SetUserSearchValue(user.userName, user.name, user.userId);
             await _userServices.UpdateAsync(user);
             return Ok();
         }
@@ -201,9 +197,6 @@ namespace RegisterUser.Controllers
             {
                 return NotFound();
             }
-
-            _searchServiceRedis?.DeleteKey(user.userName, user.name);
-            _searchServiceMongo?.delete("Dopamine_User_Search:" + user.userName + "+" + user.name);
             user.name = updateUser.name;
             user.userName = updateUser.userName;
             user.dateOfBirth = updateUser.dateOfBirth;
@@ -212,7 +205,7 @@ namespace RegisterUser.Controllers
                 key = "Dopamine_User_Search:" + user.userName + "+" + user.name,
                 value = user.userId,
             });
-            _searchServiceRedis?.SetUserSearchValue(user.userName, user.name, user.userId);
+            
             await _userServices.UpdateAsync(user);
             return Ok();
         }

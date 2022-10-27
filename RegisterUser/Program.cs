@@ -16,11 +16,11 @@ builder.Services.Configure<DatabaseSetting>(
 var multiplexer = ConnectionMultiplexer.Connect("127.0.0.1:6379");
 builder.Services.AddSingleton<IConnectionMultiplexer>(multiplexer);
 builder.Services.AddSingleton<UserServices>();
-builder.Services.AddSingleton<SearchServiceRedis>();
 builder.Services.AddSingleton<SearchServiceMongo>();
 builder.Services.AddSingleton<JwtServices>();
 builder.Services.AddSingleton<PasswordResetServices>();
 builder.Services.AddSingleton<IRabbitMQConsume, RabbitMqConsume>();
+builder.Services.AddSingleton<IRabbitMqDeleteService, RabbitMqDeleteService>();
 
 builder.Services.AddAuthentication(x =>
 {

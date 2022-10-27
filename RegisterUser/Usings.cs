@@ -25,5 +25,8 @@ global using RegisterUser.Models.EmailModels;
 global using Microsoft.AspNetCore.Http.Features;
 global using Newtonsoft.Json;
 global using RegisterUser.InterFaces;
+global using RabbitMQ.Client;
+global using RabbitMQ.Client.Events;
+
 
 

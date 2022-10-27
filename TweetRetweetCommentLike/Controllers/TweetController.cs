@@ -16,7 +16,7 @@
             await _tweetServices.createTweet(tweet);
             return Ok();
         }
-        [HttpDelete("{tweetId}")]
+        [HttpDelete("{userName}/{tweetId}")]
         public async Task<ActionResult> DeleteTweet(string userName,string tweetId)
         {
             await _tweetServices.DeleteTweet(userName,tweetId);

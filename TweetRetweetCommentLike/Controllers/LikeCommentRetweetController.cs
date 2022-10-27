@@ -1,7 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-
-namespace TweetRetweetCommentLike.Controllers
+﻿namespace TweetRetweetCommentLike.Controllers
 {
     [Route("api/[controller]/[action]")]
     [ApiController]

@@ -5,11 +5,12 @@ namespace TweetRetweetCommentLike.Services
     public class TweetServices : ITweetServices
     {
         public readonly IRabbitMqPublish _rabbitMqPublish;
+        public readonly IRabbitMqDeleteService _DeleteServices;
 
-        public TweetServices(IRabbitMqPublish rabbitMqPublish)
+        public TweetServices(IRabbitMqPublish rabbitMqPublish, IRabbitMqDeleteService deleteServices)
         {
             _rabbitMqPublish = rabbitMqPublish;
-
+            _DeleteServices = deleteServices;
         }
 
         public async Task createTweet(Tweet tweet)
@@ -19,7 +20,7 @@ namespace TweetRetweetCommentLike.Services
 
         public async Task DeleteTweet(string userName,string tweetId)
         {
-            
+            await _DeleteServices.Send(userName, tweetId);
         }
     }
 }

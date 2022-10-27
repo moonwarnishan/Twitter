@@ -1,6 +1,6 @@
 ﻿namespace RegisterUser.Services
 {
-    public class SearchServiceMongo : ISearchServiceMongo
+    public class SearchServiceMongo 
     {
         private readonly IMongoCollection<UserSearch> _usersSearchCollection;
 
@@ -15,13 +15,6 @@
         public async Task createNewSearch(UserSearch userSearch)
         {
             await _usersSearchCollection.InsertOneAsync(userSearch);
-            
-        }
-
-        //delete user search
-        public async Task delete(string key)
-        {
-            await _usersSearchCollection.DeleteOneAsync(userSearch => userSearch.key == key);
         }
 
     }

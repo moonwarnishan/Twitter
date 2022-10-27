@@ -1,6 +1,8 @@
-﻿namespace TweetRetweetCommentLike.Models
+﻿using System.Collections;
+
+namespace TweetRetweetCommentLike.Models
 {
-    public class TimelineTweets
+    public class TimelineTweets 
     {
         [BsonId]
         public string userName { get; set; }
