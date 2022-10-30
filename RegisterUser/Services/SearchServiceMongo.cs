@@ -1,6 +1,6 @@
 ﻿namespace RegisterUser.Services
 {
-    public class SearchServiceMongo 
+    public class SearchServiceMongo  : ISearchServiceMongo
     {
         private readonly IMongoCollection<UserSearch> _usersSearchCollection;
 

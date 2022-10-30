@@ -1,5 +1,6 @@
 ﻿using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
+using System.Text.RegularExpressions;
 
 namespace RegisterUser.Services
 {
@@ -15,6 +16,7 @@ namespace RegisterUser.Services
             )
         {
             _factory = new ConnectionFactory() { HostName = "localhost" };
+            //_factory.Uri = new Uri("amqps://kkeawubu:x17GNxtgIQWM74zyTnuLoaSZcQUrKNvD@armadillo.rmq.cloudamqp.com/kkeawubu");
             _connection = _factory.CreateConnection();
             _channel = _connection.CreateModel();
             _serviceProvider = serviceProvider;
@@ -35,10 +37,10 @@ namespace RegisterUser.Services
             {
                 byte[] body = e.Body.ToArray();
                 var msg = (Tweet)JsonConvert.DeserializeObject<Tweet>(Encoding.UTF8.GetString(body))!;
-
                 var collections = await _timelineCollection.Find(x => x.userName == userName).FirstOrDefaultAsync();
                 collections.tweets.Insert(0, msg);
                 await _timelineCollection.ReplaceOneAsync(x => x.userName == userName, collections);
+
             };
 
             _channel.BasicConsume(queue: "Dopamine:" + userName,

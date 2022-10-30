@@ -1,20 +1,25 @@
-﻿namespace TweetRetweetCommentLike.Services
+﻿using System.Runtime;
+
+namespace TweetRetweetCommentLike.Services
 {
     public class RabbitMqPublish : IRabbitMqPublish
     {
         private readonly IFollowBlockIndividualServices _followBlockIndividual;
         private IMongoCollection<CommentLikeRetweet> _likeCommentRetweet;
+        private readonly IMongoCollection<TweetSearchDto> _tweetSearch;
         public RabbitMqPublish(IFollowBlockIndividualServices followBlockIndividual,IOptions<DatabaseSetting.DatabaseSetting> db)
         {
             var client = new MongoClient(db.Value.connectionString);
             var database = client.GetDatabase(db.Value.databaseName);
+            _tweetSearch = database.GetCollection<TweetSearchDto>(db.Value.hashSearchCollection);
             _likeCommentRetweet = database.GetCollection<CommentLikeRetweet>(db.Value.likeCommentRetweetCollectionName);
             _followBlockIndividual = followBlockIndividual;
         }
         public async Task Send(Tweet tweet)
         {
+            
             ConnectionFactory _factory = new ConnectionFactory() { HostName = "localhost" };
-            //_factory.Uri = new Uri("amqps://kkeawubu:x17GNxtgIQWM74zyTnuLoaSZcQUrKNvD@armadillo.rmq.cloudamqp.com/kkeawubu");
+            
             var followers = new List<string>();
             if (await _followBlockIndividual.GetAllFollowers(tweet.userName) == null)
             {
@@ -26,6 +31,25 @@
                 followers.Add(tweet.userName);
             }
             tweet.tweetId = Guid.NewGuid().ToString();
+
+            var regex = new Regex(@"#\w+");
+            var dto = new TweetSearchDto();
+            
+            var matches = regex.Matches(tweet.tweetText);
+            if (matches.Count > 0)
+            {
+                foreach (var match in matches)
+                {
+                    dto.key += match.ToString();
+                }
+
+                dto.tweetId = tweet.tweetId;
+                dto.tweetText = tweet.tweetText;
+                dto.userName = tweet.userName;
+
+                await _tweetSearch.InsertOneAsync(dto);
+            }
+            
             var likeCommentRetweet = new CommentLikeRetweet()
             {
                 tweetId = tweet.tweetId,

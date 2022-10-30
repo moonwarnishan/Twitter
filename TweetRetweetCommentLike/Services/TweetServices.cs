@@ -1,4 +1,5 @@
-﻿using TweetRetweetCommentLike.Interfaces;
+﻿using MongoDB.Driver;
+using TweetRetweetCommentLike.Interfaces;
 
 namespace TweetRetweetCommentLike.Services
 {
@@ -7,8 +8,9 @@ namespace TweetRetweetCommentLike.Services
         public readonly IRabbitMqPublish _rabbitMqPublish;
         public readonly IRabbitMqDeleteService _DeleteServices;
 
-        public TweetServices(IRabbitMqPublish rabbitMqPublish, IRabbitMqDeleteService deleteServices)
+        public TweetServices(IRabbitMqPublish rabbitMqPublish, IRabbitMqDeleteService deleteServices, IOptions<DatabaseSetting.DatabaseSetting> dbsettings)
         {
+
             _rabbitMqPublish = rabbitMqPublish;
             _DeleteServices = deleteServices;
         }

@@ -13,8 +13,7 @@ namespace SearchServices.Controllers
             _searchServices = searchServices;
         }
         [HttpGet("{userKeyWord}")]
-        [Authorize]
-        public async Task<List<UserResponseDto>> getUserResult(string userKeyWord)
+        public async Task<List<UserDto>> getUserResult(string userKeyWord)
         {
             if (userKeyWord == null)
             {
@@ -24,18 +23,14 @@ namespace SearchServices.Controllers
             
         }
         [HttpGet("{hashKeyWord}")]
-        [Authorize]
         public async Task<List<HashResponseDto>> getHashResult(string hashKeyWord)
         {
             if (hashKeyWord == null)
             {
                 return null;
             }
-            
             return await _searchServices.Hashes('#'+hashKeyWord);
         }
-
-
 
 
     }

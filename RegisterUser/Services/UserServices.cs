@@ -4,13 +4,14 @@
     {
         private readonly IMongoCollection<User> _usersCollection;
         private readonly IMongoCollection<TimelineTweets> _timelCollection;
-        public UserServices(IOptions<DatabaseSetting.DatabaseSetting> DBsetting)
+        private readonly ISearchServiceMongo _searchService;
+        public UserServices(IOptions<DatabaseSetting.DatabaseSetting> DBsetting,ISearchServiceMongo searchService)
         {
             var client = new MongoClient(DBsetting.Value.connectionString);
             var db = client.GetDatabase(DBsetting.Value.databaseName);
             _usersCollection = db.GetCollection<User>(DBsetting.Value.usersCollectionName);
             _timelCollection = db.GetCollection<TimelineTweets>(DBsetting.Value.userTimelineCollection);
-
+            _searchService = searchService;
         }
         public async Task CreateAsync(User newUser)
         {
@@ -19,6 +20,12 @@
                 userName = newUser.userName,
                 tweets = new List<Tweet>()
             };
+            var userSearch = new UserSearch()
+            {
+                key = newUser.userName+':'+newUser.name+':'+newUser.email,
+                value = newUser.userId
+            };
+            await _searchService.createNewSearch(userSearch);
             await _timelCollection.InsertOneAsync(timelineTweet);
             await _usersCollection.InsertOneAsync(newUser);
         }

@@ -7,9 +7,9 @@ namespace RegisterUser.Controllers
     {
         
         private readonly UserServices _userServices;
-        private readonly SearchServiceMongo _searchServiceMongo;
+        private readonly ISearchServiceMongo _searchServiceMongo;
 
-        public UserController(UserServices userServices, SearchServiceMongo searchServiceMongo)
+        public UserController(UserServices userServices, ISearchServiceMongo searchServiceMongo)
         {
             _userServices = userServices;
             _searchServiceMongo = searchServiceMongo;

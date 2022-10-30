@@ -13,10 +13,8 @@ builder.Services.AddCors(options => options.AddPolicy("CorsPolicy", builder =>
 // Add services to the container.
 builder.Services.Configure<DatabaseSetting>(
     builder.Configuration.GetSection("DatabaseSetting"));
-var multiplexer = ConnectionMultiplexer.Connect("127.0.0.1:6379");
-builder.Services.AddSingleton<IConnectionMultiplexer>(multiplexer);
 builder.Services.AddSingleton<UserServices>();
-builder.Services.AddSingleton<SearchServiceMongo>();
+builder.Services.AddSingleton<ISearchServiceMongo, SearchServiceMongo>();
 builder.Services.AddSingleton<JwtServices>();
 builder.Services.AddSingleton<PasswordResetServices>();
 builder.Services.AddSingleton<IRabbitMQConsume, RabbitMqConsume>();
