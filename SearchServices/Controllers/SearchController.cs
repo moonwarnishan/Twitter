@@ -32,6 +32,5 @@ namespace SearchServices.Controllers
             return await _searchServices.Hashes('#'+hashKeyWord);
         }
 
-
     }
 }

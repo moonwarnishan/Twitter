@@ -33,7 +33,11 @@
                     tweetId = tweetId,
                     likes = new List<string> { userName }
                 });
-                await _notificationServices.CreateNotification(notification);
+                if (notification.receiverUserName != notification.senderUserName)
+                {
+                    await _notificationServices.CreateNotification(notification);
+                }
+                
             }
             else if (collection.likes.Contains(userName))
             {
@@ -49,7 +53,10 @@
                     senderUserName = userName,
                     message = userName + " liked your tweet",
                 };
-                await _notificationServices.CreateNotification(notification);
+                if (notification.receiverUserName != notification.senderUserName)
+                {
+                    await _notificationServices.CreateNotification(notification);
+                }
                 collection.likes.Add(userName);
                 await  _likeCommentRetweet.ReplaceOneAsync(x => x.tweetId == tweetId, collection);
             }
@@ -67,7 +74,10 @@
                     senderUserName = retweet.userName,
                     message = retweet.userName + " retweeted your tweet",
                 };
-                await _notificationServices.CreateNotification(notification);
+                if (notification.receiverUserName != notification.senderUserName)
+                {
+                    await _notificationServices.CreateNotification(notification);
+                }
                 _likeCommentRetweet.InsertOne(new CommentLikeRetweet
                 {
                     tweetId = tweetId,
@@ -90,7 +100,10 @@
                     senderUserName = retweet.userName,
                     message = retweet.userName + " retweeted your tweet",
                 };
-                await _notificationServices.CreateNotification(notification);
+                if (notification.receiverUserName != notification.senderUserName)
+                {
+                    await _notificationServices.CreateNotification(notification);
+                }
             }
            
         }
@@ -108,7 +121,10 @@
                     senderUserName = comment.userName,
                     message = comment.userName + " commented your tweet",
                 };
-                await _notificationServices.CreateNotification(notification);
+                if (notification.receiverUserName != notification.senderUserName)
+                {
+                    await _notificationServices.CreateNotification(notification);
+                }
                 _likeCommentRetweet.InsertOne(new CommentLikeRetweet
                 {
                     tweetId = tweetId,
@@ -124,7 +140,10 @@
                     senderUserName = comment.userName,
                     message = comment.userName + " commented your tweet",
                 };
-                await _notificationServices.CreateNotification(notification);
+                if (notification.receiverUserName != notification.senderUserName)
+                {
+                    await _notificationServices.CreateNotification(notification);
+                }
                 collection.comments.Add(comment);
                 await _likeCommentRetweet.ReplaceOneAsync(x => x.tweetId == tweetId, collection);
 
