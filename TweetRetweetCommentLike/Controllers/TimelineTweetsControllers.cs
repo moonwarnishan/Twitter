@@ -9,7 +9,7 @@ namespace TweetRetweetCommentLike.Controllers
     public class TimelineTweetsControllers : ControllerBase
     {
         public readonly IGetTweetServices _GetTweetServices;
-        public TimelineTweetsControllers(IGetTweetServices getTweetServices)
+        public TimelineTweetsControllers(IGetTweetServices getTweetServices, IRedisServices redisServices)
         {
             _GetTweetServices = getTweetServices;
         }
@@ -39,6 +39,21 @@ namespace TweetRetweetCommentLike.Controllers
         public async Task<List<TweetDto>> getTweetsbyuserName(string userName)
         {
             var tweets = await _GetTweetServices.GeTweetsbyuserName(userName);
+            if (tweets == null)
+            {
+                return null;
+            }
+            else
+            {
+                return tweets;
+            }
+        }
+
+
+        [HttpGet("{userName}")]
+        public async Task<List<TweetDto>> getTweetsRedis(string userName)
+        {
+            var tweets = await _GetTweetServices.GetTimelineTweetsRedis(userName);
             if (tweets == null)
             {
                 return null;

@@ -16,9 +16,12 @@ builder.Services.Configure<DatabaseSetting>(
 builder.Services.AddSingleton<UserServices>();
 builder.Services.AddSingleton<ISearchServiceMongo, SearchServiceMongo>();
 builder.Services.AddSingleton<JwtServices>();
+var multiplexer = ConnectionMultiplexer.Connect("127.0.0.1:6379");
+builder.Services.AddSingleton<IConnectionMultiplexer>(multiplexer);
 builder.Services.AddSingleton<PasswordResetServices>();
 builder.Services.AddSingleton<IRabbitMQConsume, RabbitMqConsume>();
 builder.Services.AddSingleton<IRabbitMqDeleteService, RabbitMqDeleteService>();
+builder.Services.AddSingleton<IRedisServices,RedisServices>();
 
 builder.Services.AddAuthentication(x =>
 {

@@ -14,6 +14,8 @@
     <PackageReference Include="RabbitMQ.Client" Version="6.4.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
     <PackageReference Include="Newtonsoft.Json.Bson" Version="1.0.2" />
+    <PackageReference Include="NReJSON" Version="4.0.0" />
+    <PackageReference Include="StackExchange.Redis" Version="2.6.66" />
   </ItemGroup>
 
 </Project>

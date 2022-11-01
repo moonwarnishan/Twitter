@@ -10,9 +10,11 @@ namespace RegisterUser.Services
         protected readonly IConnection _connection;
         protected readonly IModel _channel;
         protected readonly IServiceProvider _serviceProvider;
+        private readonly IRedisServices _redisServices;
         private readonly IMongoCollection<TimelineTweets> _timelineCollection;
         public RabbitMqConsume(IServiceProvider serviceProvider,
-            IOptions<DatabaseSetting.DatabaseSetting> DBsetting
+            IOptions<DatabaseSetting.DatabaseSetting> DBsetting,
+            IRedisServices redisServices
             )
         {
             _factory = new ConnectionFactory() { HostName = "localhost" };
@@ -23,6 +25,7 @@ namespace RegisterUser.Services
             var client = new MongoClient(DBsetting.Value.connectionString);
             var db = client.GetDatabase(DBsetting.Value.databaseName);
             _timelineCollection = db.GetCollection<TimelineTweets>(DBsetting.Value.userTimelineCollection);
+            _redisServices = redisServices;
         }
 
         public async Task Connect(string userName)
@@ -40,7 +43,7 @@ namespace RegisterUser.Services
                 var collections = await _timelineCollection.Find(x => x.userName == userName).FirstOrDefaultAsync();
                 collections.tweets.Insert(0, msg);
                 await _timelineCollection.ReplaceOneAsync(x => x.userName == userName, collections);
-
+                await _redisServices.SetCacheValueAsync(userName);
             };
 
             _channel.BasicConsume(queue: "Dopamine:" + userName,

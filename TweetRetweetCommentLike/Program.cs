@@ -21,6 +21,7 @@ builder.Services.AddSingleton<ILikeCommentRetweetServices, LikeCommentRetweetSer
 builder.Services.AddSingleton<INotificationServices, NotificationServices>();
 builder.Services.AddSingleton<IGetTweetServices,GetTweetServices > ();
 builder.Services.AddSingleton<IRabbitMqDeleteService, RabbitMQDeleteServices>();
+builder.Services.AddSingleton<IRedisServices, RedisServices>();
 builder.Services.AddControllers();
 builder.Services.AddAuthentication(x =>
 {

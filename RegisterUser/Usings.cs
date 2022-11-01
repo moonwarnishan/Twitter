@@ -27,6 +27,7 @@ global using Newtonsoft.Json;
 global using RegisterUser.InterFaces;
 global using RabbitMQ.Client;
 global using RabbitMQ.Client.Events;
+global using NReJSON;
 
 
 

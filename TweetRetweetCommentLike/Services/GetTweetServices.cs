@@ -4,13 +4,15 @@
     {
         private readonly IMongoCollection<TimelineTweets> _timelineCollection;
         private readonly ILikeCommentRetweetServices _likeCommentRetweetServices;
+        public readonly IRedisServices _RedisServices;
 
-        public GetTweetServices(IOptions<DatabaseSetting.DatabaseSetting> db ,ILikeCommentRetweetServices likeCommentRetweetServices)
+        public GetTweetServices(IOptions<DatabaseSetting.DatabaseSetting> db ,ILikeCommentRetweetServices likeCommentRetweetServices, IRedisServices redisServices)
         {
             var client = new MongoClient(db.Value.connectionString);
             var database = client.GetDatabase(db.Value.databaseName);
             _timelineCollection = database.GetCollection<TimelineTweets>(db.Value.userTimelineCollection);
             _likeCommentRetweetServices = likeCommentRetweetServices;
+            _RedisServices = redisServices;
         }
         //get tweets
         public async Task<List<TweetDto>> GetTimelineTweets(string userName)
@@ -134,6 +136,52 @@
             }
 
             return Tweets;
+        }
+
+
+        //Get Tweet From Redis
+        public async Task<List<TweetDto>> GetTimelineTweetsRedis(string userName)
+        {
+            var collections =await _RedisServices.timelineTweetsFromRedis(userName);
+
+            var Tweets = new List<TweetDto>();
+
+            foreach (var timelineTweet in collections)
+            {
+                var likecmnts = await _likeCommentRetweetServices.getAll(timelineTweet.tweetId);
+                if (likecmnts != null)
+                {
+                    var dto = new TweetDto()
+                    {
+                        tweetId = timelineTweet.tweetId,
+                        userName = timelineTweet.userName,
+                        tweetText = timelineTweet.tweetText,
+                        tweetTime = timelineTweet.tweetTime,
+                        comments = likecmnts.comments,
+                        likes = likecmnts.likes,
+                        retweets = likecmnts.retweets
+                    };
+                    Tweets.Add(dto);
+                }
+                else
+                {
+                    var dto = new TweetDto()
+                    {
+                        tweetId = timelineTweet.tweetId,
+                        userName = timelineTweet.userName,
+                        tweetText = timelineTweet.tweetText,
+                        tweetTime = timelineTweet.tweetTime,
+                        comments = new List<CommentDto>(),
+                        likes = new List<string>(),
+                        retweets = new List<RetweetDto>()
+                    };
+                    Tweets.Add(dto);
+                }
+
+            }
+
+            return Tweets;
+
         }
 
         //remove tweets
