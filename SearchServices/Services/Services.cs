@@ -22,7 +22,7 @@ namespace SearchServices.Services
             var list = await _users.Find(x => true).ToListAsync();
             foreach (var l in list)
             {
-                if (l._id.ToLower().Contains(keyword))
+                if (l._id.ToLower().Contains(keyword.ToLower()))
                 {
                     var dto=new UserDto();
                     dto.userName = l._id.Split(':')[0];

@@ -10,5 +10,7 @@ global using SearchServices.Services;
 global using SearchServices.DatabaseSetting;
 global using MongoDB.Driver;
 global using Microsoft.Extensions.Options;
+global using MongoDB.Bson.Serialization.Attributes;
+
 
 
