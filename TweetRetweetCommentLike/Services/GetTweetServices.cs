@@ -15,12 +15,13 @@
             _RedisServices = redisServices;
         }
         //get tweets
-        public async Task<List<TweetDto>> GetTimelineTweets(string userName)
+        public async Task<List<TweetDto>> GetTimelineTweets(string userName,int page)
         {
             var collections = await _timelineCollection.Find(x => x.userName == userName).FirstOrDefaultAsync();
             var Tweets=new List<TweetDto>();
+            var twts=collections.tweets.Take(page*10).ToList();
 
-            foreach (var timelineTweet in collections.tweets)
+            foreach (var timelineTweet in twts)
             {
                 var likecmnts = await _likeCommentRetweetServices.getAll(timelineTweet.tweetId);
                 if (likecmnts != null)

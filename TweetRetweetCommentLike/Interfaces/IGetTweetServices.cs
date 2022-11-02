@@ -2,7 +2,7 @@
 {
     public interface IGetTweetServices
     {
-        public Task<List<TweetDto>> GetTimelineTweets(string userName);
+        public Task<List<TweetDto>> GetTimelineTweets(string userName,int page);
         public Task RemoveTweet(string followedName, string userName);
         public Task<TweetDto> getTweetbyId(string userName, string TweetId);
         public Task<List<TweetDto>> GeTweetsbyuserName(string userName);

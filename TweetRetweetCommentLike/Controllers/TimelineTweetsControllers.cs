@@ -14,10 +14,10 @@ namespace TweetRetweetCommentLike.Controllers
             _GetTweetServices = getTweetServices;
         }
         //get tweets
-        [HttpGet("{userName}")]
-        public async Task<List<TweetDto>> getTweets(string userName)
+        [HttpGet("{userName}/{page}")]
+        public async Task<List<TweetDto>> getTweets(string userName, int page)
         {
-            var tweets=await _GetTweetServices.GetTimelineTweets(userName);
+            var tweets=await _GetTweetServices.GetTimelineTweets(userName,page);
             if (tweets == null)
             {
                 return null;
