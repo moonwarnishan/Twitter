@@ -5,7 +5,7 @@ namespace TweetRetweetCommentLike.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
+    //[Authorize]
     public class NotificationsController : ControllerBase
     {
         private readonly INotificationServices _notificationServices;
@@ -14,12 +14,12 @@ namespace TweetRetweetCommentLike.Controllers
             _notificationServices=notificationServices;
         }
 
-        [HttpGet("{userName}")]
-        public async Task<List<NotificationDto>> GetNotifications(string userName)
+        [HttpGet("{userName}/{page}")]
+        public async Task<List<NotificationDto>> GetNotifications(string userName, int page)
         {
-            if (await _notificationServices.GetNotification(userName) != null)
+            if (await _notificationServices.GetNotification(userName,page) != null)
             {
-                return await _notificationServices.GetNotification(userName);
+                return await _notificationServices.GetNotification(userName,page);
             }
             else
             {

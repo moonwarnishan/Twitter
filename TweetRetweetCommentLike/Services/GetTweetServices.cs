@@ -95,11 +95,12 @@
 
         }
 
-        public async Task<List<TweetDto>> GeTweetsbyuserName(string userName)
+        public async Task<List<TweetDto>> GeTweetsbyuserName(string userName,int page)
         {
             var collection = await _timelineCollection.Find(x => x.userName == userName).FirstOrDefaultAsync();
 
             var tweets = collection.tweets.FindAll(x => x.userName == userName);
+            tweets = tweets.Take(page * 5).ToList();
             var Tweets = new List<TweetDto>();
 
             foreach (var timelineTweet in tweets)

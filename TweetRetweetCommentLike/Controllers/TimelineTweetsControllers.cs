@@ -34,11 +34,11 @@ namespace TweetRetweetCommentLike.Controllers
             return await _GetTweetServices.getTweetbyId(userName, tweetId);
         }
 
-        [HttpGet("{userName}")]
+        [HttpGet("{userName}/{page}")]
         
-        public async Task<List<TweetDto>> getTweetsbyuserName(string userName)
+        public async Task<List<TweetDto>> getTweetsbyuserName(string userName, int page)
         {
-            var tweets = await _GetTweetServices.GeTweetsbyuserName(userName);
+            var tweets = await _GetTweetServices.GeTweetsbyuserName(userName,page);
             if (tweets == null)
             {
                 return null;

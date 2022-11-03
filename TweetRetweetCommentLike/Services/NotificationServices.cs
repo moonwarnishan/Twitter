@@ -48,13 +48,14 @@
             
         }
 
-        public async Task<List<NotificationDto>> GetNotification(string userName)
+        public async Task<List<NotificationDto>> GetNotification(string userName,int page)
         {
             var collection = await _notifications.FindAsync(x => x.userName == userName).Result.FirstOrDefaultAsync();
+            
             if (collection != null)
             {
                 
-                return collection.notifications;
+                return collection.notifications.Take(10*page).ToList();
             }
 
             return null;
