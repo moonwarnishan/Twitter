@@ -1,4 +1,9 @@
 ﻿
+using Microsoft.AspNetCore.Authentication.Cookies;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authentication;
+using Org.BouncyCastle.Asn1.Ocsp;
+
 namespace RegisterUser.Services
 {
     public class JwtServices : IJwtServices
@@ -24,6 +29,7 @@ namespace RegisterUser.Services
             {
                 throw new Exception("User is blocked");
             }
+
             var refreshToken = GenerateRefreshToken();
             user.refreshToken.Token = refreshToken;
             user.refreshToken.ExpireDate = DateTime.Now.AddDays(7);
@@ -32,7 +38,6 @@ namespace RegisterUser.Services
             var tokenKey = Encoding.ASCII.GetBytes(Key);
             var claim = new List<Claim>
             {
-                    new Claim("userId", user.userId),
                     new Claim(ClaimTypes.Name, user.userName),
                     new Claim(ClaimTypes.Email,user.email),
                     new Claim(ClaimTypes.Role,user.role)
@@ -44,8 +49,23 @@ namespace RegisterUser.Services
                 SigningCredentials = new SigningCredentials(
                     new SymmetricSecurityKey(tokenKey),
                     SecurityAlgorithms.HmacSha256Signature
-            )
+                )
             };
+            var claimsIdentity = new ClaimsIdentity(
+                claim, CookieAuthenticationDefaults.AuthenticationScheme);
+
+            //set claim when login
+            var authProperties = new AuthenticationProperties
+            {
+                ExpiresUtc = DateTimeOffset.UtcNow.AddMinutes(10),
+                IsPersistent = true,
+                AllowRefresh = true
+            };
+            
+            var claimsPrincipal = new ClaimsPrincipal(claimsIdentity);
+
+            Thread.CurrentPrincipal = claimsPrincipal;
+
             var token = tokenHandler.CreateToken(tokenDescriptor);
             tken.AccessToken = tokenHandler.WriteToken(token);
             tken.RefreshToken = refreshToken;

@@ -17,9 +17,9 @@ namespace RegisterUser.Controllers
         
             //Create new user
         [HttpPost]
-        public async Task<IActionResult> Register([FromBody] User NewUser)
+        public async Task<IActionResult> Register([FromBody] UserInfo NewUser)
         {
-            var user = new User()
+            var user = new UserInfo()
             {
                 userId= ObjectId.GenerateNewId().ToString(),
                 userName = NewUser.userName,

@@ -2,18 +2,18 @@
 {
     public class UserServices : IUserServices
     {
-        private readonly IMongoCollection<User> _usersCollection;
+        private readonly IMongoCollection<UserInfo> _usersCollection;
         private readonly IMongoCollection<TimelineTweets> _timelCollection;
         private readonly ISearchServiceMongo _searchService;
         public UserServices(IOptions<DatabaseSetting.DatabaseSetting> DBsetting,ISearchServiceMongo searchService)
         {
             var client = new MongoClient(DBsetting.Value.connectionString);
             var db = client.GetDatabase(DBsetting.Value.databaseName);
-            _usersCollection = db.GetCollection<User>(DBsetting.Value.usersCollectionName);
+            _usersCollection = db.GetCollection<UserInfo>(DBsetting.Value.usersCollectionName);
             _timelCollection = db.GetCollection<TimelineTweets>(DBsetting.Value.userTimelineCollection);
             _searchService = searchService;
         }
-        public async Task CreateAsync(User newUser)
+        public async Task CreateAsync(UserInfo newUser)
         {
             var timelineTweet = new TimelineTweets()
             {
@@ -31,32 +31,32 @@
         }
 
   
-        public async Task<User?> GetUserByIdAsync(string id) =>
+        public async Task<UserInfo?> GetUserByIdAsync(string id) =>
             await _usersCollection.Find(x => x.userId == id).FirstOrDefaultAsync();
 
 
-        public async Task UpdateAsync(User updatedUser) =>
+        public async Task UpdateAsync(UserInfo updatedUser) =>
             await _usersCollection.ReplaceOneAsync(x => x.userId == updatedUser.userId, updatedUser);
         
 
-        public async Task<List<User>> GetAllUsersAsync() =>
+        public async Task<List<UserInfo>> GetAllUsersAsync() =>
             await _usersCollection.Find(_ => true).ToListAsync();
         
-        public IMongoCollection<User> Users()
+        public IMongoCollection<UserInfo> Users()
         {
             return _usersCollection;
         }
         
-        public async Task<User> FindByuserNameAsync(string userName) =>
+        public async Task<UserInfo> FindByuserNameAsync(string userName) =>
             await _usersCollection.Find(x => x.userName.ToLower() == userName.ToLower()).FirstOrDefaultAsync();
 
-        public User LoginValidation(LoginModel M) =>
+        public UserInfo LoginValidation(LoginModel M) =>
             _usersCollection.Find(x => x.userName.ToLower() == M.userName.ToLower() && x.password == PasswordHash.HashPassword(M.password)).FirstOrDefault();
 
-        public User FindByuserName(string userName) =>
+        public UserInfo FindByuserName(string userName) =>
              _usersCollection.Find(x => x.userName.ToLower() == userName.ToLower()).FirstOrDefault();
         //find user by email
-        public User FindByEmail(string email) =>
+        public UserInfo FindByEmail(string email) =>
             _usersCollection.Find(x => x.email.ToLower() == email.ToLower()).FirstOrDefault();
     }
 }

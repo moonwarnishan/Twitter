@@ -3,15 +3,18 @@
     public class NotificationServices : INotificationServices
     {
         private readonly IMongoCollection<NotificationCollection> _notifications;
-        public NotificationServices(IOptions<DatabaseSetting.DatabaseSetting> db)
+        private readonly IRabbitMqNotification _mqNotification;
+        public NotificationServices(IOptions<DatabaseSetting.DatabaseSetting> db, IRabbitMqNotification mqNotification)
         {
             var client = new MongoClient(db.Value.connectionString);
             var database = client.GetDatabase(db.Value.databaseName);
             _notifications = database.GetCollection<NotificationCollection>(db.Value.notificationCollectionName);
+            _mqNotification = mqNotification;
         }
         //create
         public async Task CreateNotification(NotificationDto notification)
         {
+            await _mqNotification.Send(notification);
             var collection = await _notifications.FindAsync(x => x.userName == notification.receiverUserName).Result.FirstOrDefaultAsync();
             if (collection == null)
             {

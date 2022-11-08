@@ -1,3 +1,5 @@
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Identity;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,6 +15,7 @@ builder.Services.AddCors(options => options.AddPolicy("CorsPolicy", builder =>
 // Add services to the container.
 builder.Services.Configure<DatabaseSetting>(
     builder.Configuration.GetSection("DatabaseSetting"));
+
 builder.Services.AddSingleton<UserServices>();
 builder.Services.AddSingleton<ISearchServiceMongo, SearchServiceMongo>();
 builder.Services.AddSingleton<JwtServices>();
@@ -21,8 +24,14 @@ builder.Services.AddSingleton<IConnectionMultiplexer>(multiplexer);
 builder.Services.AddSingleton<PasswordResetServices>();
 builder.Services.AddSingleton<IRabbitMQConsume, RabbitMqConsume>();
 builder.Services.AddSingleton<IRabbitMqDeleteService, RabbitMqDeleteService>();
+builder.Services.AddSingleton<IRabbitMQNotification,RabbitMQNotification>();
 builder.Services.AddSingleton<IRedisServices,RedisServices>();
-
+builder.Services.AddSingleton<NotificationHub>();
+builder.Services.AddSignalR();
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie();
+builder.Services.Configure<IdentityOptions>(options =>
+    options.ClaimsIdentity.UserNameClaimType = ClaimTypes.NameIdentifier);
 builder.Services.AddAuthentication(x =>
 {
     x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -34,7 +43,7 @@ builder.Services.AddAuthentication(x =>
     x.TokenValidationParameters = new TokenValidationParameters
     {
         ValidateIssuerSigningKey = true,
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(builder.Configuration.GetSection("JWTKey").ToString())),
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(builder.Configuration.GetSection("JWTKey").ToString() ?? string.Empty)),
         ValidateIssuer = false,
         ValidateAudience = false
     };
@@ -52,7 +61,6 @@ builder.Services.Configure<FormOptions>(o => {
     o.MultipartBodyLengthLimit = int.MaxValue;
     o.MemoryBufferThreshold = int.MaxValue;
 });
-
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -78,4 +86,14 @@ app.UseAuthorization();
 
 app.MapControllers();
 app.UseCors("CorsPolicy");
+app.MapHub<NotificationHub>("/livenotification");
+IHostApplicationLifetime lifetime = app.Lifetime;
+IServiceProvider serviceProvider = app.Services.GetRequiredService<IServiceProvider>();
+lifetime.ApplicationStarted.Register(
+    () =>
+    {
+        var rabbitMqservices = (IRabbitMQNotification)serviceProvider.GetService(typeof(IRabbitMQNotification))!;
+        rabbitMqservices.Connect();
+    });
+
 app.Run();

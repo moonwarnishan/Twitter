@@ -28,6 +28,10 @@ global using RegisterUser.InterFaces;
 global using RabbitMQ.Client;
 global using RabbitMQ.Client.Events;
 global using NReJSON;
+global using Microsoft.AspNetCore.SignalR;
+global using RegisterUser.Hub;
+global using System.Threading.Tasks;
+
 
 
 
