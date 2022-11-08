@@ -5,6 +5,7 @@ namespace SearchServices.Controllers
 {
     [Route("api/[controller]/[action]")]
     [ApiController]
+    [Authorize]
     public class SearchController : ControllerBase
     {
         private readonly IServices _searchServices;

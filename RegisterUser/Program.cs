@@ -1,5 +1,7 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity;
+using Serilog;
+using Serilog.Events;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -52,15 +54,20 @@ builder.Services.AddAuthentication(x =>
 var emailConfig = builder.Configuration
     .GetSection("EmailConfiguration")
     .Get<EmailConfiguration>();
-
-
 builder.Services.AddSingleton(emailConfig);
+Log.Logger = new LoggerConfiguration()
+    .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
+    .Enrich.FromLogContext()
+    .WriteTo.Console()
+    .CreateBootstrapLogger();
 
-builder.Services.Configure<FormOptions>(o => {
-    o.ValueLengthLimit = int.MaxValue;
-    o.MultipartBodyLengthLimit = int.MaxValue;
-    o.MemoryBufferThreshold = int.MaxValue;
-});
+Log.Information("Starting web host");
+
+// Full setup of serilog. We read log settings from appsettings.json
+builder.Host.UseSerilog((context, services, configuration) => configuration
+    .ReadFrom.Configuration(context.Configuration)
+    .ReadFrom.Services(services)
+    .Enrich.FromLogContext());
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -70,6 +77,10 @@ builder.Services.AddSwaggerGen();
 
 
 var app = builder.Build();
+app.UseSerilogRequestLogging(configure =>
+{
+    configure.MessageTemplate = "HTTP {RequestMethod} {RequestPath} {userName} responded {StatusCode} in {Elapsed:0.0000}ms";
+});
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -83,6 +94,37 @@ app.UseHttpsRedirection();
 
 app.UseAuthentication();
 app.UseAuthorization();
+if (!app.Environment.IsDevelopment())
+{
+    // Do not add exception handler for dev environment. In dev,
+    // we get the developer exception page with detailed error info.
+    app.UseExceptionHandler(errorApp =>
+    {
+        // Logs unhandled exceptions. For more information about all the
+        // different possibilities for how to handle errors see
+        // https://docs.microsoft.com/en-us/aspnet/core/fundamentals/error-handling?view=aspnetcore-5.0
+        errorApp.Run(async context =>
+        {
+            // Return machine-readable problem details. See RFC 7807 for details.
+            // https://datatracker.ietf.org/doc/html/rfc7807#page-6
+            var pd = new ProblemDetails
+            {
+                Type = "https://demo.api.com/errors/internal-server-error",
+                Title = "An unrecoverable error occurred",
+                Status = StatusCodes.Status500InternalServerError,
+                Detail = "This is a demo error used to demonstrate problem details",
+            };
+            pd.Extensions.Add("RequestId", context.TraceIdentifier);
+            await context.Response.WriteAsJsonAsync(pd, pd.GetType(), null, contentType: "application/problem+json");
+        });
+    });
+}
+app.MapGet("/", (IDiagnosticContext diagnosticContext) =>
+{
+    // You can enrich the diagnostic context with custom properties.
+    // They will be logged with the HTTP request.
+    diagnosticContext.Set("UserId", "someone");
+});
 
 app.MapControllers();
 app.UseCors("CorsPolicy");

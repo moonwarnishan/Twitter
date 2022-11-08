@@ -16,7 +16,6 @@ namespace TweetRetweetCommentLike.Controllers
         
         //new follow
         [HttpPost("{followUserName}/{followedUserName}")]
-        //[Authorize]
         public async Task<ActionResult> Create(string followUserName, string followedUserName)
         {
             bool check = await _followBlockService.IsBlocked(followUserName, followedUserName);
@@ -29,7 +28,6 @@ namespace TweetRetweetCommentLike.Controllers
         }
         //delete follow
         [HttpDelete("{followUserName}/{followedUserName}")]
-         //[Authorize]
         public async Task<ActionResult> Delete(string followUserName, string followedUserName)
         {
             await _followBlockService.Delete(followUserName, followedUserName);
@@ -38,7 +36,7 @@ namespace TweetRetweetCommentLike.Controllers
         }
         //get all followed users
         [HttpGet("{followUserName}")]
-        // [Authorize]
+
         public async Task<ActionResult<List<string>>> GetFollowedUsers(string followUserName)
         {
             var followedUsers = await _followBlockService.GetFollowedUsers(followUserName);
@@ -46,7 +44,7 @@ namespace TweetRetweetCommentLike.Controllers
         }
         //get all followers
         [HttpGet("{followingUserName}")]
-        //[Authorize]
+
         public async Task<List<string>> GetFollowerUsers(string followingUserName)
         {
             var followerUsers = await _followBlockIndividualService.GetAllFollowers(followingUserName);
@@ -55,7 +53,7 @@ namespace TweetRetweetCommentLike.Controllers
 
         //a user followed or not
         [HttpGet("{followedUserName}/{followUserName}")]
-        //[Authorize]
+
         public async Task<ActionResult<bool>> IsFollowed(string followUserName, string followedUserName)
         {
             var isFollowed = await _followBlockService.IsFollowed(followedUserName,followUserName);
@@ -63,7 +61,7 @@ namespace TweetRetweetCommentLike.Controllers
         }
         //block a user
         [HttpPost("{userName}/{blockedUserName}")]
-        //[Authorize]
+
         public async Task<ActionResult> Block(string userName, string blockedUserName)
         {
             await _followBlockService.Delete(blockedUserName,userName);
@@ -73,7 +71,7 @@ namespace TweetRetweetCommentLike.Controllers
         }
         //unblock a user
         [HttpDelete("{userName}/{blockedUserName}")]
-        //[Authorize]
+
         public async Task<ActionResult> Unblock(string userName, string blockedUserName)
         {
             await _followBlockService.DeleteBlock(userName, blockedUserName);
@@ -81,7 +79,7 @@ namespace TweetRetweetCommentLike.Controllers
         }
         //get all blocked users
         [HttpGet("{userName}")]
-        //[Authorize]
+
         public async Task<ActionResult<List<string>>> GetBlockedUsers(string userName)
         {
             var blockedUsers = await _followBlockService.GetBlockedUsers(userName);
@@ -89,7 +87,6 @@ namespace TweetRetweetCommentLike.Controllers
         }
         //is blocked
         [HttpGet("{userName}/{blockedUserName}")]
-        //[Authorize]
         public async Task<ActionResult<bool>> IsBlocked(string userName, string blockedUserName)
         {
             var isBlocked = await _followBlockService.IsBlocked(userName, blockedUserName);
@@ -98,7 +95,6 @@ namespace TweetRetweetCommentLike.Controllers
         }
         //follower and following count
         [HttpGet("{userName}")]
-        //[Authorize]
         public async Task<FollowFollowingDto> GetFollowFollowingCount(string userName)
         {
             var follower=await _followBlockIndividualService.NumberOfFollowers(userName);
