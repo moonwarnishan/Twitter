@@ -7,9 +7,11 @@ namespace RegisterUser.Controllers
     public class PasswordResetController : ControllerBase
     {
         private readonly PasswordResetServices _passwordResetServices;
-        public PasswordResetController(PasswordResetServices passwordResetServices)
+        private readonly ILogger<PasswordResetController> _logger;
+        public PasswordResetController(PasswordResetServices passwordResetServices, ILogger<PasswordResetController> logger)
         {
             _passwordResetServices = passwordResetServices;
+            _logger = logger;
         }
 
 
@@ -20,8 +22,10 @@ namespace RegisterUser.Controllers
             var result = _passwordResetServices.RequestPasswordReset(email.ToString());
             if (result == null)
             {
+                _logger.LogWarning("User Not Found {0}", email);
                 return NotFound(JsonConvert.SerializeObject("User Not Found"));
             }
+            _logger.LogInformation("Password reset request for {0}", email);
             return Ok(JsonConvert.SerializeObject(result));
         }
         [HttpPost]
@@ -30,10 +34,12 @@ namespace RegisterUser.Controllers
             try
             {
                 await _passwordResetServices.ResetPassword(resetPasswordDto);
+                _logger.LogInformation("Password Changed for {0}", resetPasswordDto.userId);
                 return Ok(JsonConvert.SerializeObject("Password Changed"));
             }
             catch (Exception e)
             {
+                _logger.LogError("Password Change Failed for {0}", resetPasswordDto.userId);
                 return BadRequest(e.Message);
             }
         }

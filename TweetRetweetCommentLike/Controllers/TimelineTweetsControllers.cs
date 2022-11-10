@@ -1,7 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-
-namespace TweetRetweetCommentLike.Controllers
+﻿namespace TweetRetweetCommentLike.Controllers
 {
     [Route("api/[controller]/[action]")]
     [ApiController]
@@ -9,9 +6,11 @@ namespace TweetRetweetCommentLike.Controllers
     public class TimelineTweetsControllers : ControllerBase
     {
         public readonly IGetTweetServices _GetTweetServices;
-        public TimelineTweetsControllers(IGetTweetServices getTweetServices, IRedisServices redisServices)
+        private readonly ILogger<TimelineTweetsControllers> _logger;
+        public TimelineTweetsControllers(IGetTweetServices getTweetServices, IRedisServices redisServices, ILogger<TimelineTweetsControllers> logger)
         {
             _GetTweetServices = getTweetServices;
+            _logger = logger;
         }
         //get tweets
         [HttpGet("{userName}/{page}")]
@@ -20,10 +19,12 @@ namespace TweetRetweetCommentLike.Controllers
             var tweets=await _GetTweetServices.GetTimelineTweets(userName,page);
             if (tweets == null)
             {
+                _logger.LogWarning("No tweets found for {0}", userName);
                 return null;
             }
             else
             {
+                _logger.LogInformation("Get tweets of {0}", userName);
                 return tweets;
             }
         }
@@ -31,6 +32,7 @@ namespace TweetRetweetCommentLike.Controllers
         [HttpGet("{userName}/{tweetId}")]
         public async Task<TweetDto> getSpecificTweet(string userName, string tweetId)
         {
+            _logger.LogInformation("Get tweet of {0} tweetId is {1}", userName, tweetId);
             return await _GetTweetServices.getTweetbyId(userName, tweetId);
         }
 
@@ -41,10 +43,12 @@ namespace TweetRetweetCommentLike.Controllers
             var tweets = await _GetTweetServices.GeTweetsbyuserName(userName,page);
             if (tweets == null)
             {
+                _logger.LogWarning("tweet  is null for {0}", userName);
                 return null;
             }
             else
             {
+                _logger.LogInformation("Get All tweets of {0}", userName);
                 return tweets;
             }
         }
@@ -56,10 +60,12 @@ namespace TweetRetweetCommentLike.Controllers
             var tweets = await _GetTweetServices.GetTimelineTweetsRedis(userName);
             if (tweets == null)
             {
+                _logger.LogWarning("Redis doesnot find any tweet");
                 return null;
             }
             else
             {
+                _logger.LogInformation("Get All tweets from redis of {0}", userName);
                 return tweets;
             }
         }

@@ -31,6 +31,11 @@ global using NReJSON;
 global using Microsoft.AspNetCore.SignalR;
 global using RegisterUser.Hub;
 global using System.Threading.Tasks;
+global using Microsoft.AspNetCore.Authentication;
+global using Microsoft.AspNetCore.Authentication.Cookies;
+global using Microsoft.AspNetCore.Identity;
+global using Serilog;
+global using Serilog.Events;
 
 
 

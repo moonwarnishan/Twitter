@@ -17,9 +17,12 @@ namespace TweetRetweetCommentLike.Services
         }
         public async Task Send(Tweet tweet)
         {
-            
-            ConnectionFactory _factory = new ConnectionFactory() { HostName = "localhost" };
-            
+
+            ConnectionFactory _factory = new ConnectionFactory()
+            {
+                Uri = new Uri("amqps://uslpaenl:EhK787ZeOdfT8Cerm4svZN2p53pD0mtl@beaver.rmq.cloudamqp.com/uslpaenl")
+            };
+
             var followers = new List<string>();
             if (await _followBlockIndividual.GetAllFollowers(tweet.userName) == null)
             {

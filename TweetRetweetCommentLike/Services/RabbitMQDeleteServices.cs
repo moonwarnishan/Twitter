@@ -19,8 +19,10 @@
 
         public async Task Send(string userName, string tweetId)
         {
-            ConnectionFactory _factory = new ConnectionFactory() {HostName = "localhost"};
-            //_factory.Uri = new Uri("amqps://kkeawubu:x17GNxtgIQWM74zyTnuLoaSZcQUrKNvD@armadillo.rmq.cloudamqp.com/kkeawubu");
+            ConnectionFactory _factory = new ConnectionFactory()
+            {
+                Uri = new Uri("amqps://uslpaenl:EhK787ZeOdfT8Cerm4svZN2p53pD0mtl@beaver.rmq.cloudamqp.com/uslpaenl")
+            };
             var followers = new List<string>();
             if (await _followBlockIndividual.GetAllFollowers(userName) == null)
             {

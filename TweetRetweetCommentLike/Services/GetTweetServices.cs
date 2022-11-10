@@ -146,44 +146,48 @@
         {
             var collections =await _RedisServices.timelineTweetsFromRedis(userName);
 
-            var Tweets = new List<TweetDto>();
-
-            foreach (var timelineTweet in collections)
+            if (collections != null)
             {
-                var likecmnts = await _likeCommentRetweetServices.getAll(timelineTweet.tweetId);
-                if (likecmnts != null)
+                var Tweets = new List<TweetDto>();
+
+                foreach (var timelineTweet in collections)
                 {
-                    var dto = new TweetDto()
+                    var likecmnts = await _likeCommentRetweetServices.getAll(timelineTweet.tweetId);
+                    if (likecmnts != null)
                     {
-                        tweetId = timelineTweet.tweetId,
-                        userName = timelineTweet.userName,
-                        tweetText = timelineTweet.tweetText,
-                        tweetTime = timelineTweet.tweetTime,
-                        comments = likecmnts.comments,
-                        likes = likecmnts.likes,
-                        retweets = likecmnts.retweets
-                    };
-                    Tweets.Add(dto);
-                }
-                else
-                {
-                    var dto = new TweetDto()
+                        var dto = new TweetDto()
+                        {
+                            tweetId = timelineTweet.tweetId,
+                            userName = timelineTweet.userName,
+                            tweetText = timelineTweet.tweetText,
+                            tweetTime = timelineTweet.tweetTime,
+                            comments = likecmnts.comments,
+                            likes = likecmnts.likes,
+                            retweets = likecmnts.retweets
+                        };
+                        Tweets.Add(dto);
+                    }
+                    else
                     {
-                        tweetId = timelineTweet.tweetId,
-                        userName = timelineTweet.userName,
-                        tweetText = timelineTweet.tweetText,
-                        tweetTime = timelineTweet.tweetTime,
-                        comments = new List<CommentDto>(),
-                        likes = new List<string>(),
-                        retweets = new List<RetweetDto>()
-                    };
-                    Tweets.Add(dto);
+                        var dto = new TweetDto()
+                        {
+                            tweetId = timelineTweet.tweetId,
+                            userName = timelineTweet.userName,
+                            tweetText = timelineTweet.tweetText,
+                            tweetTime = timelineTweet.tweetTime,
+                            comments = new List<CommentDto>(),
+                            likes = new List<string>(),
+                            retweets = new List<RetweetDto>()
+                        };
+                        Tweets.Add(dto);
+                    }
+
                 }
 
+                return Tweets;
             }
 
-            return Tweets;
-
+            return null;
         }
 
         //remove tweets

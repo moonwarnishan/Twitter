@@ -10,8 +10,11 @@
 
         public async Task Send(NotificationDto Notification)
         {
-            ConnectionFactory _factory = new ConnectionFactory() { HostName = "localhost" };
-            //_factory.Uri = new Uri("amqps://kkeawubu:x17GNxtgIQWM74zyTnuLoaSZcQUrKNvD@armadillo.rmq.cloudamqp.com/kkeawubu");
+            ConnectionFactory _factory = new ConnectionFactory()
+            {
+                Uri = new Uri("amqps://uslpaenl:EhK787ZeOdfT8Cerm4svZN2p53pD0mtl@beaver.rmq.cloudamqp.com/uslpaenl")
+            };
+           
             var followers = new List<string>();
 
             using (IConnection connection = _factory.CreateConnection())

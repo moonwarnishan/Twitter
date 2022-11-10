@@ -19,7 +19,7 @@ namespace RegisterUser.Hub
         {
             var context = new HttpContextAccessor();
             
-            // string? name = HttpContext.User.Identity.Name;
+            string? name = Context.User.Identity.Name;
             Clients.All.SendAsync("Notification", message);
             foreach (var connectionId in _connections.GetConnections(who))
             {
@@ -29,7 +29,7 @@ namespace RegisterUser.Hub
 
         public override Task OnConnectedAsync()
         {
-            string name = "";
+            string name = Context.User.Identity.Name;
 
             _connections.Add(name, Context.ConnectionId);
 
@@ -39,7 +39,7 @@ namespace RegisterUser.Hub
 
         public override Task OnDisconnectedAsync(Exception? exception)
         {
-            string name = "";
+            string name = Context.User.Identity.Name;
 
             _connections.Remove(name, Context.ConnectionId);
             return base.OnDisconnectedAsync(exception);

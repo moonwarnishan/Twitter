@@ -1,5 +1,4 @@
-﻿
-namespace RegisterUser.Services
+﻿namespace RegisterUser.Services
 {
     public class RabbitMqDeleteService : IRabbitMqDeleteService
     {
@@ -15,12 +14,15 @@ namespace RegisterUser.Services
             IRedisServices redisServices
         )
         {
-            _factory = new ConnectionFactory() {HostName = "localhost"};
+            _factory = new ConnectionFactory()
+            {
+                Uri = new Uri("amqps://uslpaenl:EhK787ZeOdfT8Cerm4svZN2p53pD0mtl@beaver.rmq.cloudamqp.com/uslpaenl")
+            };
             _connection = _factory.CreateConnection();
             _channel = _connection.CreateModel();
             _serviceProvider = serviceProvider;
-            var client = new MongoClient(DBsetting.Value.ConnectionString);
-            var db = client.GetDatabase(DBsetting.Value.DatabaseName);
+            var client = new MongoClient(DBsetting.Value.connectionString);
+            var db = client.GetDatabase(DBsetting.Value.databaseName);
             _timelineCollection = db.GetCollection<TimelineTweets>(DBsetting.Value.userTimelineCollection);
             _redisServices = redisServices;
         }

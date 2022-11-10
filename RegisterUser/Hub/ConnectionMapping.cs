@@ -1,4 +1,6 @@
-﻿namespace RegisterUser.Hub
+﻿using System.Collections;
+
+namespace RegisterUser.Hub
 {
     public class ConnectionMapping<T>
     {
@@ -15,52 +17,76 @@
 
         public void Add(T key, string connectionId)
         {
-            lock (_connections)
+            try
             {
-                HashSet<string> connections;
-                if (!_connections.TryGetValue(key, out connections))
+                lock (_connections)
                 {
-                    connections = new HashSet<string>();
-                    _connections.Add(key, connections);
-                }
+                    HashSet<string> connections;
+                    if (!_connections.TryGetValue(key, out connections))
+                    {
+                        connections = new HashSet<string>();
+                        _connections.Add(key, connections);
+                    }
 
-                lock (connections)
-                {
-                    connections.Add(connectionId);
+                    lock (connections)
+                    {
+                        connections.Add(connectionId);
+                    }
                 }
             }
+            catch (Exception e)
+            {
+                
+            }
+
         }
 
         public IEnumerable<string> GetConnections(T key)
         {
-            HashSet<string> connections;
-            if (_connections.TryGetValue(key, out connections))
+            try
             {
-                return connections;
+                HashSet<string> connections;
+                if (_connections.TryGetValue(key, out connections))
+                {
+                    return connections;
+                }
+
+                return Enumerable.Empty<string>();
+            }
+            catch (Exception e)
+            {
+                
             }
 
-            return Enumerable.Empty<string>();
+            return new List<string>();
         }
 
         public void Remove(T key, string connectionId)
         {
-            lock (_connections)
+            try
             {
-                HashSet<string> connections;
-                if (!_connections.TryGetValue(key, out connections))
+                lock (_connections)
                 {
-                    return;
-                }
-
-                lock (connections)
-                {
-                    connections.Remove(connectionId);
-
-                    if (connections.Count == 0)
+                    HashSet<string> connections;
+                    if (!_connections.TryGetValue(key, out connections))
                     {
-                        _connections.Remove(key);
+                        return;
+                    }
+
+                    lock (connections)
+                    {
+                        connections.Remove(connectionId);
+
+                        if (connections.Count == 0)
+                        {
+                            _connections.Remove(key);
+                        }
                     }
                 }
+            }
+            catch (Exception e)
+            {
+                
             }
         }
     }

@@ -8,14 +8,15 @@ namespace RegisterUser.Controllers
         
         private readonly UserServices _userServices;
         private readonly ISearchServiceMongo _searchServiceMongo;
+        private readonly ILogger<UserController> _logger;
 
-        public UserController(UserServices userServices, ISearchServiceMongo searchServiceMongo)
+        public UserController(UserServices userServices, ISearchServiceMongo searchServiceMongo, ILogger<UserController> logger)
         {
             _userServices = userServices;
             _searchServiceMongo = searchServiceMongo;
+            _logger = logger;
         }
-        
-            //Create new user
+        //Create new user
         [HttpPost]
         public async Task<IActionResult> Register([FromBody] UserInfo NewUser)
         {
@@ -29,7 +30,8 @@ namespace RegisterUser.Controllers
                 password = PasswordHash.HashPassword(NewUser.password)
             };
             await _userServices.CreateAsync(user);
-            return Ok();
+            _logger.LogInformation("User Created {0}", user.userName);
+            return Ok(user);
             
         }
         
@@ -50,6 +52,7 @@ namespace RegisterUser.Controllers
                 userName = user.userName,
                 dateOfBirth = user.dateOfBirth.ToString().Split(' ')[0]
             };
+            _logger.LogInformation("Get User {0}", user.userName);
             return Ok(userResponse);
         }
 
@@ -73,6 +76,7 @@ namespace RegisterUser.Controllers
                 value = user.userId,
             });
             await _userServices.UpdateAsync(user);
+            _logger.LogInformation("User Updated {0}", user.userName);
             return Ok();
         }
 
@@ -92,6 +96,7 @@ namespace RegisterUser.Controllers
 
 
             }).ToList();
+            _logger.LogInformation("Admin requested for Users");
             return Ok(result);
 
         }
@@ -107,6 +112,7 @@ namespace RegisterUser.Controllers
             }
             user.isBlocked = true;
             await _userServices.UpdateAsync(user);
+            _logger.LogWarning("User Blocked {0}", user.userName);
             return Ok();
         }
         //unblock user
@@ -120,6 +126,7 @@ namespace RegisterUser.Controllers
                 return NotFound();
             }
             user.isBlocked = false;
+            _logger.LogWarning("User Unblocked By admin userName: {0}", user.userName);
             await _userServices.UpdateAsync(user);
             return Ok();
         }
@@ -151,6 +158,7 @@ namespace RegisterUser.Controllers
             }
 
             user.role = "Admin";
+            _logger.LogInformation("Admin Made  {0} as Admin", user.userName);
             await _userServices.UpdateAsync(user);
             return Ok();
 
@@ -167,6 +175,7 @@ namespace RegisterUser.Controllers
             }
 
             user.role = "User";
+            _logger.LogWarning("Admin Removed  {0} from Admin", user.userName);
             await _userServices.UpdateAsync(user);
             return Ok();
         }
@@ -205,7 +214,7 @@ namespace RegisterUser.Controllers
                 key = "Dopamine_User_Search:" + user.userName + "+" + user.name,
                 value = user.userId,
             });
-            
+            _logger.LogInformation("Admin Updated User {0}", user.userName);
             await _userServices.UpdateAsync(user);
             return Ok();
         }

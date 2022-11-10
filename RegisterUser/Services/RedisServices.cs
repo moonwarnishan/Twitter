@@ -6,8 +6,8 @@
         private readonly IConnectionMultiplexer _connection;
         public RedisServices(IOptions<DatabaseSetting.DatabaseSetting> DBsetting, IConnectionMultiplexer connection)
         {
-            var client = new MongoClient(DBsetting.Value.ConnectionString);
-            var db = client.GetDatabase(DBsetting.Value.DatabaseName);
+            var client = new MongoClient(DBsetting.Value.connectionString);
+            var db = client.GetDatabase(DBsetting.Value.databaseName);
             _timelineCollection = db.GetCollection<TimelineTweets>(DBsetting.Value.userTimelineCollection);
             _connection = connection;
         }

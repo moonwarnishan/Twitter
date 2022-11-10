@@ -8,12 +8,14 @@ namespace TweetRetweetCommentLike.Controllers
     {
         private readonly IFollowBlockServices _followBlockService;
         private readonly IFollowBlockIndividualServices _followBlockIndividualService;
-        public FollowBlockController(IFollowBlockServices followService, IFollowBlockIndividualServices followBlockIndividualService)
+        private readonly ILogger<FollowBlockController> _logger;
+        public FollowBlockController(IFollowBlockServices followService, IFollowBlockIndividualServices followBlockIndividualService, ILogger<FollowBlockController> logger)
         {
             _followBlockService = followService;
             _followBlockIndividualService = followBlockIndividualService;
+            _logger = logger;
         }
-        
+
         //new follow
         [HttpPost("{followUserName}/{followedUserName}")]
         public async Task<ActionResult> Create(string followUserName, string followedUserName)
@@ -24,6 +26,7 @@ namespace TweetRetweetCommentLike.Controllers
                 return BadRequest("You are blocked this user so you can not follow him");
             }
             await _followBlockService.Create(followUserName, followedUserName);
+            _logger.LogInformation("User {0} follow {1}", followUserName, followedUserName);
             return Ok();
         }
         //delete follow
@@ -32,6 +35,7 @@ namespace TweetRetweetCommentLike.Controllers
         {
             await _followBlockService.Delete(followUserName, followedUserName);
             await _followBlockIndividualService.DeleteFollowee(followedUserName,followUserName);
+            _logger.LogInformation("User {0} unfollow {1}", followUserName, followedUserName);
             return Ok();
         }
         //get all followed users
@@ -40,6 +44,7 @@ namespace TweetRetweetCommentLike.Controllers
         public async Task<ActionResult<List<string>>> GetFollowedUsers(string followUserName)
         {
             var followedUsers = await _followBlockService.GetFollowedUsers(followUserName);
+            _logger.LogInformation("Get all followed users of {0}", followUserName);
             return Ok(followedUsers);
         }
         //get all followers
@@ -48,6 +53,7 @@ namespace TweetRetweetCommentLike.Controllers
         public async Task<List<string>> GetFollowerUsers(string followingUserName)
         {
             var followerUsers = await _followBlockIndividualService.GetAllFollowers(followingUserName);
+            _logger.LogInformation("Get all followers of {0}", followingUserName);
             return followerUsers;
         }
 
@@ -67,6 +73,7 @@ namespace TweetRetweetCommentLike.Controllers
             await _followBlockService.Delete(blockedUserName,userName);
             await _followBlockIndividualService.DeleteFollowee(userName,blockedUserName);
             await _followBlockService.CreateBlock(userName, blockedUserName);
+            _logger.LogInformation("User {0} blocked {1}", userName, blockedUserName);
             return Ok();
         }
         //unblock a user
@@ -75,6 +82,7 @@ namespace TweetRetweetCommentLike.Controllers
         public async Task<ActionResult> Unblock(string userName, string blockedUserName)
         {
             await _followBlockService.DeleteBlock(userName, blockedUserName);
+            _logger.LogInformation("User {0} unblocked {1}", userName, blockedUserName);
             return Ok();
         }
         //get all blocked users
@@ -83,6 +91,7 @@ namespace TweetRetweetCommentLike.Controllers
         public async Task<ActionResult<List<string>>> GetBlockedUsers(string userName)
         {
             var blockedUsers = await _followBlockService.GetBlockedUsers(userName);
+            _logger.LogInformation("Get all blocked users of {0}", userName);
             return Ok(blockedUsers);
         }
         //is blocked
@@ -104,6 +113,7 @@ namespace TweetRetweetCommentLike.Controllers
                 follower = follower,
                 following = following
             };
+            _logger.LogInformation("Get follower and following count of {0}", userName);
             return response;
         }
 

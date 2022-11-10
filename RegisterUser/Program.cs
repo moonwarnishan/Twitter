@@ -1,7 +1,5 @@
-using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Identity;
-using Serilog;
-using Serilog.Events;
+
+using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -21,8 +19,8 @@ builder.Services.Configure<DatabaseSetting>(
 builder.Services.AddSingleton<UserServices>();
 builder.Services.AddSingleton<ISearchServiceMongo, SearchServiceMongo>();
 builder.Services.AddSingleton<JwtServices>();
-var multiplexer = ConnectionMultiplexer.Connect("127.0.0.1:6379");
-builder.Services.AddSingleton<IConnectionMultiplexer>(multiplexer);
+ConnectionMultiplexer redis = ConnectionMultiplexer.Connect("redis-17516.c301.ap-south-1-1.ec2.cloud.redislabs.com:17516,password=r4CglWMh8yDjLs3LWYA7evwkFWTReC6n");
+builder.Services.AddSingleton<IConnectionMultiplexer>(redis);
 builder.Services.AddSingleton<PasswordResetServices>();
 builder.Services.AddSingleton<IRabbitMQConsume, RabbitMqConsume>();
 builder.Services.AddSingleton<IRabbitMqDeleteService, RabbitMqDeleteService>();
@@ -31,7 +29,13 @@ builder.Services.AddSingleton<IRedisServices,RedisServices>();
 builder.Services.AddSingleton<NotificationHub>();
 builder.Services.AddSignalR();
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-    .AddCookie();
+    .AddCookie(options =>
+    {
+        options.ExpireTimeSpan = TimeSpan.FromMinutes(20);
+        options.SlidingExpiration = true;
+    });
+
+builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 builder.Services.Configure<IdentityOptions>(options =>
     options.ClaimsIdentity.UserNameClaimType = ClaimTypes.NameIdentifier);
 builder.Services.AddAuthentication(x =>
@@ -90,8 +94,6 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
-
 app.UseAuthentication();
 app.UseAuthorization();
 if (!app.Environment.IsDevelopment())
@@ -128,6 +130,7 @@ app.MapGet("/", (IDiagnosticContext diagnosticContext) =>
 
 app.MapControllers();
 app.UseCors("CorsPolicy");
+
 app.MapHub<NotificationHub>("/livenotification");
 IHostApplicationLifetime lifetime = app.Lifetime;
 IServiceProvider serviceProvider = app.Services.GetRequiredService<IServiceProvider>();
@@ -137,5 +140,6 @@ lifetime.ApplicationStarted.Register(
         var rabbitMqservices = (IRabbitMQNotification)serviceProvider.GetService(typeof(IRabbitMQNotification))!;
         rabbitMqservices.Connect();
     });
+app.UseCookiePolicy();
 
 app.Run();

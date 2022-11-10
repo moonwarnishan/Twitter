@@ -1,11 +1,10 @@
-﻿using AspNetCore.Identity.MongoDbCore.Models;
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Identity;
 
 namespace RegisterUser.Models
 {
     public class UserInfo 
     {
-        [BsonElement]
+        [BsonElement,BsonId]
         public string? userId { get; set; }
         [Required, MinLength(2), BsonElement]
         public string? name { get; set; }

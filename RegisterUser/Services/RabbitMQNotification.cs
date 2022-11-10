@@ -1,5 +1,4 @@
-﻿using System.Xml.Linq;
-using IConnection = RabbitMQ.Client.IConnection;
+﻿using IConnection = RabbitMQ.Client.IConnection;
 
 namespace RegisterUser.Services
 {
@@ -14,8 +13,10 @@ namespace RegisterUser.Services
         private readonly NotificationHub _hub;
         public RabbitMQNotification(IServiceProvider serviceProvider,NotificationHub hub)
         {
-            _factory = new ConnectionFactory() { HostName = "localhost" };
-            //_factory.Uri = new Uri("amqps://kkeawubu:x17GNxtgIQWM74zyTnuLoaSZcQUrKNvD@armadillo.rmq.cloudamqp.com/kkeawubu");
+            _factory = new ConnectionFactory()
+            {
+                Uri = new Uri("amqps://uslpaenl:EhK787ZeOdfT8Cerm4svZN2p53pD0mtl@beaver.rmq.cloudamqp.com/uslpaenl")
+            };
             _connection = _factory.CreateConnection();
             _channel = _connection.CreateModel();
             _serviceProvider = serviceProvider;
