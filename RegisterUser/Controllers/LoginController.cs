@@ -9,7 +9,11 @@
         private readonly IRabbitMqDeleteService _deleteService;
         private readonly UserServices _userServices;
         private readonly ILogger<LoginController> _logger;
-        public LoginController(JwtServices jwtServices, IRabbitMQConsume rabbitMqConsume, IRabbitMqDeleteService deleteService, UserServices userServices, ILogger<LoginController> logger)
+        public LoginController(JwtServices jwtServices,
+            IRabbitMQConsume rabbitMqConsume,
+            IRabbitMqDeleteService deleteService,
+            UserServices userServices,
+            ILogger<LoginController> logger)
         {
             _jwtServices = jwtServices;
             _rabbitMqConsume = rabbitMqConsume;
@@ -28,27 +32,7 @@
             }
             else
             {
-                var user =await _userServices.FindByuserNameAsync(M.userName);
-                var claim = new List<Claim>
-                {
-                    new Claim(ClaimTypes.Name, user.userName),
-                    new Claim(ClaimTypes.Email,user.email),
-                    new Claim(ClaimTypes.Role,user.role)
-                };
-                var claimsIdentity = new ClaimsIdentity(
-                    claim, CookieAuthenticationDefaults.AuthenticationScheme);
-                //set claim when login
-                var authProperties = new AuthenticationProperties
-                {
-                    ExpiresUtc = DateTimeOffset.UtcNow.AddMinutes(10),
-                    IsPersistent = true,
-                    AllowRefresh = true
-                };
-
-                await HttpContext.SignInAsync(
-                    CookieAuthenticationDefaults.AuthenticationScheme,
-                    new ClaimsPrincipal(claimsIdentity),
-                    authProperties);
+                
                 _logger.LogInformation("{0} logged in.",M.userName);
 
                 try

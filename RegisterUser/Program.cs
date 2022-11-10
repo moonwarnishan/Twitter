@@ -1,6 +1,4 @@
 
-using Microsoft.IdentityModel.Tokens;
-
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -15,7 +13,6 @@ builder.Services.AddCors(options => options.AddPolicy("CorsPolicy", builder =>
 // Add services to the container.
 builder.Services.Configure<DatabaseSetting>(
     builder.Configuration.GetSection("DatabaseSetting"));
-
 builder.Services.AddSingleton<UserServices>();
 builder.Services.AddSingleton<ISearchServiceMongo, SearchServiceMongo>();
 builder.Services.AddSingleton<JwtServices>();
@@ -28,13 +25,6 @@ builder.Services.AddSingleton<IRabbitMQNotification,RabbitMQNotification>();
 builder.Services.AddSingleton<IRedisServices,RedisServices>();
 builder.Services.AddSingleton<NotificationHub>();
 builder.Services.AddSignalR();
-builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-    .AddCookie(options =>
-    {
-        options.ExpireTimeSpan = TimeSpan.FromMinutes(20);
-        options.SlidingExpiration = true;
-    });
-
 builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 builder.Services.Configure<IdentityOptions>(options =>
     options.ClaimsIdentity.UserNameClaimType = ClaimTypes.NameIdentifier);
@@ -130,7 +120,20 @@ app.MapGet("/", (IDiagnosticContext diagnosticContext) =>
 
 app.MapControllers();
 app.UseCors("CorsPolicy");
-
+// app.Use(async (context, next) =>
+// {
+//     // you could get from token or get from session. 
+//     string token = context.Request.Headers["Authorization"];
+//     if (!string.IsNullOrEmpty(token))
+//     {
+//         var tok = token.Replace("Bearer ", "");
+//         var jwttoken = new JwtSecurityTokenHandler().ReadJwtToken(tok);
+//         var userIdentity = new ClaimsIdentity(jwttoken.Claims);
+//         context.User = new ClaimsPrincipal(userIdentity);
+//     }
+//     await next();
+//
+// });
 app.MapHub<NotificationHub>("/livenotification");
 IHostApplicationLifetime lifetime = app.Lifetime;
 IServiceProvider serviceProvider = app.Services.GetRequiredService<IServiceProvider>();

@@ -49,7 +49,6 @@
         
         public async Task<UserInfo> FindByuserNameAsync(string userName) =>
             await _usersCollection.Find(x => x.userName.ToLower() == userName.ToLower()).FirstOrDefaultAsync();
-
         public UserInfo LoginValidation(LoginModel M) =>
             _usersCollection.Find(x => x.userName.ToLower() == M.userName.ToLower() && x.password == PasswordHash.HashPassword(M.password)).FirstOrDefault();
 

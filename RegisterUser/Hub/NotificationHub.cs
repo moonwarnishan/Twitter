@@ -1,25 +1,12 @@
-﻿
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.SignalR;
-
-namespace RegisterUser.Hub
+﻿namespace RegisterUser.Hub
 {
-    
     public class NotificationHub : Microsoft.AspNetCore.SignalR.Hub
     {
         private static readonly ConnectionMapping<string> _connections =
             new ConnectionMapping<string>();
-        protected IHubContext<NotificationHub> _context;
-        public NotificationHub(IHubContext<NotificationHub> context)
-        {
-            _context = context;
-        }
-
         public void SendChatMessage(string who, NotificationDto message)
         {
-            var context = new HttpContextAccessor();
-            
-            string? name = Context.User.Identity.Name;
+            // string name = Context.User;
             Clients.All.SendAsync("Notification", message);
             foreach (var connectionId in _connections.GetConnections(who))
             {
@@ -29,9 +16,9 @@ namespace RegisterUser.Hub
 
         public override Task OnConnectedAsync()
         {
-            string name = Context.User.Identity.Name;
+            var name = Context.User;
 
-            _connections.Add(name, Context.ConnectionId);
+            _connections.Add("", Context.ConnectionId);
 
             //return Task.CompletedTask;
             return base.OnConnectedAsync();
