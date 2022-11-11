@@ -1,4 +1,7 @@
-﻿namespace RegisterUser.Hub
+﻿using Microsoft.AspNetCore.Http;
+using MongoDB.Driver.Core.Connections;
+
+namespace RegisterUser.Hub
 {
     public class NotificationHub : Microsoft.AspNetCore.SignalR.Hub
     {
@@ -6,19 +9,17 @@
             new ConnectionMapping<string>();
         public void SendChatMessage(string who, NotificationDto message)
         {
-            // string name = Context.User;
-            Clients.All.SendAsync("Notification", message);
-            foreach (var connectionId in _connections.GetConnections(who))
-            {
-                
-            }
+            
+            var userName = Context.GetHttpContext()?.Request.Query["userName"];
+            var connectionId = _connections.GetConnections(who).FirstOrDefault();
+            Clients.Client(connectionId).SendAsync("Notification", message);
         }
 
         public override Task OnConnectedAsync()
         {
-            var name = Context.User;
-
-            _connections.Add("", Context.ConnectionId);
+            //var userName = Context.GetHttpContext()?.Request.Headers.Authorization;
+            var username = Context.GetHttpContext().Request.Query["username"];
+            _connections.Add(username, Context.ConnectionId);
 
             //return Task.CompletedTask;
             return base.OnConnectedAsync();
@@ -26,9 +27,9 @@
 
         public override Task OnDisconnectedAsync(Exception? exception)
         {
-            string name = Context.User.Identity.Name;
+            var username = Context.GetHttpContext().Request.Query["username"];
 
-            _connections.Remove(name, Context.ConnectionId);
+            _connections.Remove(username, Context.ConnectionId);
             return base.OnDisconnectedAsync(exception);
         }
         // public static string GetClaimValue(HttpContext httpContext)
