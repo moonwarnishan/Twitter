@@ -1,17 +1,14 @@
 
-using Serilog.Events;
-using Serilog;
-
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddCors(options => options.AddPolicy("CorsPolicy", builder =>
-        builder.AllowAnyMethod()
-            .AllowAnyHeader()
-            .WithOrigins("http://localhost:4200")
-            .AllowCredentials()
-    )
-);
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("CorsPolicy",
+        builder => builder.AllowAnyOrigin()
+            .AllowAnyMethod()
+            .AllowAnyHeader());
+});
 builder.Services.Configure<DatabaseSetting>(
     builder.Configuration.GetSection("DatabaseSettings"));
 ConnectionMultiplexer redis = ConnectionMultiplexer.Connect("redis-17516.c301.ap-south-1-1.ec2.cloud.redislabs.com:17516,password=r4CglWMh8yDjLs3LWYA7evwkFWTReC6n");
@@ -64,7 +61,7 @@ builder.Services.AddSwaggerGen();
 var app = builder.Build();
 app.UseSerilogRequestLogging(configure =>
 {
-    configure.MessageTemplate = "HTTP {RequestMethod} {RequestPath} {userName} responded {StatusCode} in {Elapsed:0.0000}ms";
+    configure.MessageTemplate = "HTTP {RequestMethod} {RequestPath} responded {StatusCode} in {Elapsed:0.0000}ms";
 });
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

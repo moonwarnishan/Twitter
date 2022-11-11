@@ -1,7 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
-using MongoDB.Driver.Core.Connections;
-
-namespace RegisterUser.Hub
+﻿namespace RegisterUser.Hub
 {
     public class NotificationHub : Microsoft.AspNetCore.SignalR.Hub
     {
@@ -9,10 +6,17 @@ namespace RegisterUser.Hub
             new ConnectionMapping<string>();
         public void SendChatMessage(string who, NotificationDto message)
         {
-            
-            var userName = Context.GetHttpContext()?.Request.Query["username"];
-            var connectionId = _connections.GetConnections(who).FirstOrDefault();
-            Clients.Client(connectionId).SendAsync("Notification", message);
+
+            try
+            {
+                var userName = Context.GetHttpContext()?.Request.Query["username"];
+                var connectionId = _connections.GetConnections(who).FirstOrDefault();
+                Clients.Client(connectionId).SendAsync("Notification", message);
+            }
+            catch (Exception e)
+            {
+                
+            }
         }
 
         public override Task OnConnectedAsync()

@@ -1,6 +1,4 @@
-﻿using System.Runtime;
-
-namespace TweetRetweetCommentLike.Services
+﻿namespace TweetRetweetCommentLike.Services
 {
     public class RabbitMqPublish : IRabbitMqPublish
     {

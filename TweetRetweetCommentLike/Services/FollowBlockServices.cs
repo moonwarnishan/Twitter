@@ -1,6 +1,4 @@
-﻿using TweetRetweetCommentLike.Interfaces;
-
-namespace TweetRetweetCommentLike.Services
+﻿namespace TweetRetweetCommentLike.Services
 {
     public class FollowBlockServices : IFollowBlockServices
     {

@@ -2,13 +2,13 @@
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddCors(options => options.AddPolicy("CorsPolicy", builder =>
-        builder.AllowAnyMethod()
-            .AllowAnyHeader()
-            .WithOrigins("http://localhost:4200")
-            .AllowCredentials()
-    )
-);
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("CorsPolicy",
+        builder => builder.AllowAnyOrigin()
+            .AllowAnyMethod()
+            .AllowAnyHeader());
+});
 
 // Add services to the container.
 builder.Services.Configure<DatabaseSetting>(
@@ -73,7 +73,7 @@ builder.Services.AddSwaggerGen();
 var app = builder.Build();
 app.UseSerilogRequestLogging(configure =>
 {
-    configure.MessageTemplate = "HTTP {RequestMethod} {RequestPath} {userName} responded {StatusCode} in {Elapsed:0.0000}ms";
+    configure.MessageTemplate = "HTTP {RequestMethod} {RequestPath}  responded {StatusCode} in {Elapsed:0.0000}ms";
 });
 
 // Configure the HTTP request pipeline.

@@ -12,6 +12,7 @@ global using MongoDB.Driver;
 global using Microsoft.Extensions.Options;
 global using MongoDB.Bson.Serialization.Attributes;
 global using Microsoft.AspNetCore.Authorization;
-
+global using Serilog.Events;
+global using Serilog;
 
 

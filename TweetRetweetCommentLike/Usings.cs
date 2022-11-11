@@ -2,7 +2,6 @@
 global using TweetRetweetCommentLike.Services;
 global using Microsoft.AspNetCore.Authorization;
 global using MongoDB.Bson;
-global using TweetRetweetCommentLike.Models;
 global using System.ComponentModel.DataAnnotations;
 global using MongoDB.Bson.Serialization.Attributes;
 global using Microsoft.Extensions.Options;
@@ -19,4 +18,7 @@ global using Newtonsoft.Json;
 global using TweetRetweetCommentLike.Interfaces;
 global using RabbitMQ.Client.Events;
 global using System.Threading.Channels;
+global using Serilog.Events;
+global using Serilog;
 global using TweetRetweetCommentLike.Models;
+
