@@ -10,7 +10,7 @@ namespace RegisterUser.Hub
         public void SendChatMessage(string who, NotificationDto message)
         {
             
-            var userName = Context.GetHttpContext()?.Request.Query["userName"];
+            var userName = Context.GetHttpContext()?.Request.Query["username"];
             var connectionId = _connections.GetConnections(who).FirstOrDefault();
             Clients.Client(connectionId).SendAsync("Notification", message);
         }
