@@ -3,7 +3,7 @@ namespace TweetRetweetCommentLike.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    //[Authorize]
+    [Authorize]
     public class NotificationsController : ControllerBase
     {
         private readonly INotificationServices _notificationServices;

@@ -2,7 +2,7 @@
 {
     [Route("api/[controller]/[action]")]
     [ApiController]
-    //[Authorize]
+    [Authorize]
     public class TimelineTweetsControllers : ControllerBase
     {
         public readonly IGetTweetServices _GetTweetServices;

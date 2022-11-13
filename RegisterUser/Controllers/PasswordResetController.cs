@@ -40,7 +40,7 @@ namespace RegisterUser.Controllers
             catch (Exception e)
             {
                 _logger.LogError("Password Change Failed for {0}", resetPasswordDto.userId);
-                return BadRequest(e.Message);
+                throw new NotImplementedException();
             }
         }
 

@@ -122,7 +122,8 @@
                 catch
                 {
                     //log an error message or throw an exception, or both.
-                    throw;
+                    throw new NotImplementedException();
+
                 }
                 finally
                 {
@@ -147,7 +148,8 @@
                 catch
                 {
                     //log an error message or throw an exception, or both.
-                    throw;
+                    throw new NotImplementedException();
+
                 }
                 finally
                 {

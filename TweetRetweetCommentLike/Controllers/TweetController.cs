@@ -2,7 +2,7 @@
 {
     [Route("api/[controller]")]
     [ApiController]
-    //[Authorize]
+    [Authorize]
     public class TweetController : ControllerBase
     {
         private readonly ITweetServices _tweetServices;

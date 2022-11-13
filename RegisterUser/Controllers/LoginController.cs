@@ -9,17 +9,20 @@
         private readonly IRabbitMqDeleteService _deleteService;
         private readonly UserServices _userServices;
         private readonly ILogger<LoginController> _logger;
+        private readonly IRedisServices _redisServices;
         public LoginController(JwtServices jwtServices,
             IRabbitMQConsume rabbitMqConsume,
             IRabbitMqDeleteService deleteService,
             UserServices userServices,
-            ILogger<LoginController> logger)
+            ILogger<LoginController> logger,
+            IRedisServices redisServices)
         {
             _jwtServices = jwtServices;
             _rabbitMqConsume = rabbitMqConsume;
             _deleteService = deleteService;
             _userServices = userServices;
             _logger = logger;
+            _redisServices = redisServices;
         }
         [HttpPost]
         public async Task<IActionResult> Login([FromBody] LoginModel M)
@@ -35,14 +38,8 @@
                 
                 _logger.LogInformation("{0} logged in.",M.userName);
 
-                try
-                {
-                    await _rabbitMqConsume.Connect(M.userName);
-                }
-                catch (Exception)
-                {
-
-                }
+                await _rabbitMqConsume.Connect(M.userName);
+                await _redisServices.SetCacheValueAsync(M.userName);
                 return Ok(token);
 
             }
@@ -51,32 +48,16 @@
         [HttpGet("{userName}")]
         public async Task<IActionResult> ConsumeTweet(string userName)
         {
-            try
-            {
-                await _rabbitMqConsume.Connect(userName);
-                _logger.LogInformation("Consume tweet from {0}", userName);
-            }
-            catch (Exception)
-            {
-
-            }
-            
+            await _rabbitMqConsume.Connect(userName);
+            _logger.LogInformation("Consume tweet from {0}", userName);
             return Ok();
         }
 
         [HttpGet("{userName}")]
         public async Task<IActionResult> DeleteTweet(string userName)
         {
-            try
-            {
-                await _deleteService.Connect(userName);
-                _logger.LogInformation("Delete tweet from {0} timeline", userName);
-            }
-            catch (Exception)
-            {
-
-            }
-
+            await _deleteService.Connect(userName);
+            _logger.LogInformation("Delete tweet from {0} timeline", userName);
             return Ok();
         }
 

@@ -3,24 +3,23 @@
     public class RabbitMqPublish : IRabbitMqPublish
     {
         private readonly IFollowBlockIndividualServices _followBlockIndividual;
+        private readonly IModel _model;
+        private readonly IConnection _connection;
+        private readonly IRabbitMQService _rabbitMQServices;
         private IMongoCollection<CommentLikeRetweet> _likeCommentRetweet;
         private readonly IMongoCollection<TweetSearchDto> _tweetSearch;
-        public RabbitMqPublish(IFollowBlockIndividualServices followBlockIndividual,IOptions<DatabaseSetting.DatabaseSetting> db)
+        public RabbitMqPublish(IFollowBlockIndividualServices followBlockIndividual,IOptions<DatabaseSetting.DatabaseSetting> db,IRabbitMQService mqService)
         {
             var client = new MongoClient(db.Value.connectionString);
             var database = client.GetDatabase(db.Value.databaseName);
             _tweetSearch = database.GetCollection<TweetSearchDto>(db.Value.hashSearchCollection);
             _likeCommentRetweet = database.GetCollection<CommentLikeRetweet>(db.Value.likeCommentRetweetCollectionName);
             _followBlockIndividual = followBlockIndividual;
+            _rabbitMQServices = mqService;
         }
         public async Task Send(Tweet tweet)
         {
-
-            ConnectionFactory _factory = new ConnectionFactory()
-            {
-                Uri = new Uri("amqps://uslpaenl:EhK787ZeOdfT8Cerm4svZN2p53pD0mtl@beaver.rmq.cloudamqp.com/uslpaenl")
-            };
-
+            
             var followers = new List<string>();
             if (await _followBlockIndividual.GetAllFollowers(tweet.userName) == null)
             {
@@ -62,8 +61,7 @@
 
             Dictionary<String, Object> args = new Dictionary<String, Object>();
             args.Add("x-message-ttl", 86400000);
-            using (IConnection connection = _factory.CreateConnection())
-            using (IModel channel = connection.CreateModel())
+            using (IModel channel = _rabbitMQServices.CreateChannel().CreateModel())
             {
                 channel.ExchangeDeclare("Dopamine:" + tweet.userName, ExchangeType.Fanout);
                 foreach (var follower in followers)

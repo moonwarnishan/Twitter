@@ -13,6 +13,7 @@ builder.Services.AddCors(options =>
 // Add services to the container.
 builder.Services.Configure<DatabaseSetting>(
     builder.Configuration.GetSection("DatabaseSetting"));
+builder.Services.AddSingleton<IRabbitMQService, RabbitMQService>();
 builder.Services.AddSingleton<UserServices>();
 builder.Services.AddSingleton<ISearchServiceMongo, SearchServiceMongo>();
 builder.Services.AddSingleton<JwtServices>();

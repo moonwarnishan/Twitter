@@ -11,6 +11,7 @@ builder.Services.AddCors(options =>
 });
 builder.Services.Configure<DatabaseSetting>(
     builder.Configuration.GetSection("DatabaseSettings"));
+builder.Services.AddSingleton<IRabbitMQService,RabbitMQService>();
 ConnectionMultiplexer redis = ConnectionMultiplexer.Connect("redis-17516.c301.ap-south-1-1.ec2.cloud.redislabs.com:17516,password=r4CglWMh8yDjLs3LWYA7evwkFWTReC6n");
 builder.Services.AddSingleton<IConnectionMultiplexer>(redis);
 builder.Services.AddSingleton<IFollowBlockServices, FollowBlockServices>();

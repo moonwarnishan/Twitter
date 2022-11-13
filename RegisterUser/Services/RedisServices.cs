@@ -22,12 +22,12 @@
             if (collection.tweets.Count >= 10)
             {
                 var timelineTweets = JsonConvert.SerializeObject(collection.tweets.Take(10));
-                await db.StringSetAsync(key, timelineTweets, TimeSpan.FromMinutes(3));
+                await db.StringSetAsync(key, timelineTweets, TimeSpan.FromHours(4));
             }
             else
             {
                 var timelineTweets = JsonConvert.SerializeObject(collection.tweets);
-                await db.StringSetAsync(key, timelineTweets, TimeSpan.FromMinutes(3));
+                await db.StringSetAsync(key, timelineTweets, TimeSpan.FromHours(2));
             }
             
         }

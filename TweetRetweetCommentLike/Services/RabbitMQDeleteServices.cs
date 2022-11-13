@@ -3,13 +3,15 @@
     public class RabbitMQDeleteServices : IRabbitMqDeleteService
     {
         private readonly IFollowBlockIndividualServices _followBlockIndividual;
+        private IRabbitMQService _rabbitMQServices;
         private IMongoCollection<CommentLikeRetweet> _likeCommentRetweet;
         private IMongoCollection<TweetSearchDto> _tweetSearch;
         private readonly ILikeCommentRetweetServices _likeCommentRetweetService;
         public RabbitMQDeleteServices(IFollowBlockIndividualServices followBlockIndividual,
             IOptions<DatabaseSetting.DatabaseSetting> db,
-            ILikeCommentRetweetServices likeCommentRetweetService)
+            ILikeCommentRetweetServices likeCommentRetweetService, IRabbitMQService mqService)
         {
+            _rabbitMQServices = mqService;
             var client = new MongoClient(db.Value.connectionString);
             var database = client.GetDatabase(db.Value.databaseName);
             _followBlockIndividual = followBlockIndividual;
@@ -19,10 +21,7 @@
 
         public async Task Send(string userName, string tweetId)
         {
-            ConnectionFactory _factory = new ConnectionFactory()
-            {
-                Uri = new Uri("amqps://uslpaenl:EhK787ZeOdfT8Cerm4svZN2p53pD0mtl@beaver.rmq.cloudamqp.com/uslpaenl")
-            };
+            
             var followers = new List<string>();
             if (await _followBlockIndividual.GetAllFollowers(userName) == null)
             {
@@ -33,11 +32,9 @@
                 followers = await _followBlockIndividual.GetAllFollowers(userName);
                 followers.Add(userName);
             }
-
             await _likeCommentRetweetService.Delete(tweetId);
             await _tweetSearch.FindOneAndDeleteAsync(x => x.tweetId == tweetId);
-            using (IConnection connection = _factory.CreateConnection())
-            using (IModel channel = connection.CreateModel())
+            using (IModel channel = _rabbitMQServices.CreateChannel().CreateModel())
             {
                 channel.ExchangeDeclare("Dopaminedelete:" + userName, ExchangeType.Fanout);
                 foreach (var follower in followers)

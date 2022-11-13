@@ -1,25 +1,19 @@
 ﻿namespace RegisterUser.Services
 {
-    public class RabbitMqConsume : IRabbitMQConsume
+    public class RabbitMqConsume : IRabbitMQConsume, IDisposable
     {
-        protected readonly ConnectionFactory _factory;
-        protected readonly IConnection _connection;
-        protected readonly IModel _channel;
+        protected IModel _channel;
+        private readonly IConnection _connection;
         protected readonly IServiceProvider _serviceProvider;
         private readonly IRedisServices _redisServices;
         private readonly IMongoCollection<TimelineTweets> _timelineCollection;
         public RabbitMqConsume(IServiceProvider serviceProvider,
             IOptions<DatabaseSetting.DatabaseSetting> DBsetting,
-            IRedisServices redisServices
+            IRedisServices redisServices,
+            IRabbitMQService mqService
             )
         {
-            _factory = new ConnectionFactory()
-            {
-                Uri = new Uri("amqps://uslpaenl:EhK787ZeOdfT8Cerm4svZN2p53pD0mtl@beaver.rmq.cloudamqp.com/uslpaenl")
-
-            };
-            _connection = _factory.CreateConnection();
-            _channel = _connection.CreateModel();
+            _connection = mqService.CreateChannel();
             _serviceProvider = serviceProvider;
             var client = new MongoClient(DBsetting.Value.connectionString);
             var db = client.GetDatabase(DBsetting.Value.databaseName);
@@ -30,11 +24,9 @@
         public async Task Connect(string userName)
         {
 
+            _channel = _connection.CreateModel();
             var followers = new List<string>();
-
-
-            var consumer = new EventingBasicConsumer(_channel);
-
+            var consumer = new AsyncEventingBasicConsumer(_channel);
             consumer.Received += async (m, e) =>
             {
                 byte[] body = e.Body.ToArray();
@@ -43,11 +35,21 @@
                 collections.tweets.Insert(0, msg);
                 await _timelineCollection.ReplaceOneAsync(x => x.userName == userName, collections);
                 await _redisServices.SetCacheValueAsync(userName);
+                await Task.CompletedTask;
+                _channel.BasicAck(e.DeliveryTag, false);
             };
 
             _channel.BasicConsume(queue: "Dopamine:" + userName,
                 autoAck: true,
                 consumer: consumer);
+            await Task.CompletedTask;
+        }
+        public void Dispose()
+        {
+            if (_channel.IsOpen)
+                _channel.Close();
+            if (_connection.IsOpen)
+                _connection.Close();
         }
     }
 }
